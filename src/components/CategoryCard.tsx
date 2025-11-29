@@ -6,9 +6,10 @@ interface CategoryCardProps {
   category: "paper" | "plastic" | "metal" | "ewaste";
   price: number;
   onSelect: () => void;
+  imageUrl?: string;
 }
 
-const CategoryCard = ({ category, price, onSelect }: CategoryCardProps) => {
+const CategoryCard = ({ category, price, onSelect, imageUrl }: CategoryCardProps) => {
   const getIcon = () => {
     switch (category) {
       case "paper":
@@ -38,7 +39,17 @@ const CategoryCard = ({ category, price, onSelect }: CategoryCardProps) => {
   return (
     <Card className="hover:shadow-elevated transition-all cursor-pointer" onClick={onSelect}>
       <CardContent className="p-6 text-center space-y-4">
-        <div className="flex justify-center">{getIcon()}</div>
+        {imageUrl ? (
+          <div className="w-full h-32 overflow-hidden rounded-lg">
+            <img 
+              src={imageUrl} 
+              alt={getCategoryName()} 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="flex justify-center">{getIcon()}</div>
+        )}
         <div>
           <h3 className="font-semibold text-lg text-foreground">{getCategoryName()}</h3>
           <p className="text-2xl font-bold text-primary mt-2">₹{price}/kg</p>

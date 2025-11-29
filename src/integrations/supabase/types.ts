@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      category_images: {
+        Row: {
+          category: Database["public"]["Enums"]["scrap_category"]
+          created_at: string
+          id: string
+          image_url: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["scrap_category"]
+          created_at?: string
+          id?: string
+          image_url: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["scrap_category"]
+          created_at?: string
+          id?: string
+          image_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      home_banners: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_images: {
         Row: {
           created_at: string
@@ -58,6 +106,7 @@ export type Database = {
           pickup_longitude: number | null
           pickup_time: string
           status: Database["public"]["Enums"]["order_status"]
+          sub_category: string | null
           total_amount: number | null
           updated_at: string
         }
@@ -75,6 +124,7 @@ export type Database = {
           pickup_longitude?: number | null
           pickup_time: string
           status?: Database["public"]["Enums"]["order_status"]
+          sub_category?: string | null
           total_amount?: number | null
           updated_at?: string
         }
@@ -92,6 +142,7 @@ export type Database = {
           pickup_longitude?: number | null
           pickup_time?: string
           status?: Database["public"]["Enums"]["order_status"]
+          sub_category?: string | null
           total_amount?: number | null
           updated_at?: string
         }
@@ -158,6 +209,33 @@ export type Database = {
         Update: {
           category?: Database["public"]["Enums"]["scrap_category"]
           id?: string
+          price_per_kg?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sub_categories: {
+        Row: {
+          category: Database["public"]["Enums"]["scrap_category"]
+          created_at: string
+          id: string
+          name: string
+          price_per_kg: number
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["scrap_category"]
+          created_at?: string
+          id?: string
+          name: string
+          price_per_kg: number
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["scrap_category"]
+          created_at?: string
+          id?: string
+          name?: string
           price_per_kg?: number
           updated_at?: string
         }

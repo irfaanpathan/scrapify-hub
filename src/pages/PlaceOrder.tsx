@@ -20,6 +20,8 @@ const PlaceOrder = () => {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [category, setCategory] = useState(location.state?.category || "");
+  const [subCategory, setSubCategory] = useState("");
+  const [subCategories, setSubCategories] = useState<any[]>([]);
   const [weight, setWeight] = useState("");
   const [knowsWeight, setKnowsWeight] = useState("yes");
   const [address, setAddress] = useState("");
@@ -36,6 +38,28 @@ const PlaceOrder = () => {
       }
     });
   }, [navigate]);
+
+  useEffect(() => {
+    if (category) {
+      fetchSubCategories();
+      setSubCategory("");
+    }
+  }, [category]);
+
+  const fetchSubCategories = async () => {
+    const { data, error } = await supabase
+      .from("sub_categories")
+      .select("*")
+      .eq("category", category)
+      .order("name");
+
+    if (error) {
+      console.error("Error fetching sub-categories:", error);
+      return;
+    }
+
+    setSubCategories(data || []);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -74,6 +98,7 @@ const PlaceOrder = () => {
         .insert({
           customer_id: user.id,
           category,
+          sub_category: subCategory,
           estimated_weight: knowsWeight === "yes" ? parseFloat(weight) : null,
           pickup_address: address,
           pickup_time: pickupDate?.toISOString(),
@@ -121,10 +146,10 @@ const PlaceOrder = () => {
               <div className="space-y-2">
                 <Label htmlFor="category">Scrap Category</Label>
                 <Select value={category} onValueChange={setCategory} required>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="paper">Paper</SelectItem>
                     <SelectItem value="plastic">Plastic</SelectItem>
                     <SelectItem value="metal">Metal</SelectItem>
@@ -133,13 +158,39 @@ const PlaceOrder = () => {
                 </Select>
               </div>
 
+              {category && subCategories.length > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="subCategory">Sub-Category</Label>
+                  <Select value={subCategory} onValueChange={setSubCategory} required>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Select sub-category" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50">
+                      {subCategories.map((sub) => (
+                        <SelectItem key={sub.id} value={sub.name}>
+                          {sub.name} - ₹{sub.price_per_kg}/kg
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {category && subCategory && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                    ⚠️ <strong>Note:</strong> Price may vary during doorstep inspection by partner.
+                  </p>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label>Do you know the weight?</Label>
                 <Select value={knowsWeight} onValueChange={setKnowsWeight}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-background z-50">
                     <SelectItem value="yes">Yes, I know the weight</SelectItem>
                     <SelectItem value="no">No, I don't know</SelectItem>
                   </SelectContent>
@@ -184,7 +235,7 @@ const PlaceOrder = () => {
                       {pickupDate ? format(pickupDate, "PPP") : "Select date"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0 bg-background">
                     <Calendar
                       mode="single"
                       selected={pickupDate}
