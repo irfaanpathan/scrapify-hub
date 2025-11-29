@@ -10,6 +10,8 @@ const Index = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [prices, setPrices] = useState<any[]>([]);
+  const [banner, setBanner] = useState<any>(null);
+  const [categoryImages, setCategoryImages] = useState<any>({});
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -33,7 +35,33 @@ const Index = () => {
       if (data) setPrices(data);
     };
 
+    const fetchBanner = async () => {
+      const { data } = await supabase
+        .from("home_banners")
+        .select("*")
+        .eq("is_active", true)
+        .maybeSingle();
+      
+      if (data) setBanner(data);
+    };
+
+    const fetchCategoryImages = async () => {
+      const { data } = await supabase
+        .from("category_images")
+        .select("*");
+      
+      if (data) {
+        const imagesMap: any = {};
+        data.forEach((img) => {
+          imagesMap[img.category] = img.image_url;
+        });
+        setCategoryImages(imagesMap);
+      }
+    };
+
     fetchPrices();
+    fetchBanner();
+    fetchCategoryImages();
   }, []);
 
   const handleCategorySelect = (category: string) => {
@@ -48,36 +76,47 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="bg-gradient-hero text-primary-foreground py-20">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto space-y-6">
-            <h1 className="text-5xl md:text-6xl font-bold">
-              Turn Your Scrap Into Cash
-            </h1>
-            <p className="text-xl md:text-2xl opacity-90">
-              Sell household, office, and factory scrap from the comfort of your home
-            </p>
-            <div className="flex gap-4 justify-center mt-8">
-              {user ? (
-                <Button 
-                  size="lg" 
-                  variant="secondary"
-                  className="text-lg"
-                  onClick={() => navigate("/order")}
-                >
-                  Place Order Now
-                </Button>
-              ) : (
-                <Button 
-                  size="lg" 
-                  variant="secondary"
-                  className="text-lg"
-                  onClick={() => navigate("/auth")}
-                >
-                  Get Started
-                </Button>
-              )}
+      {/* Hero Section with Banner */}
+      <section className="bg-gradient-hero text-primary-foreground">
+        {banner?.image_url && (
+          <div className="w-full h-64 md:h-96 overflow-hidden">
+            <img 
+              src={banner.image_url} 
+              alt="Home Banner" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+        <div className="py-20">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-3xl mx-auto space-y-6">
+              <h1 className="text-5xl md:text-6xl font-bold">
+                Turn Your Scrap Into Cash
+              </h1>
+              <p className="text-xl md:text-2xl opacity-90">
+                Sell household, office, and factory scrap from the comfort of your home
+              </p>
+              <div className="flex gap-4 justify-center mt-8">
+                {user ? (
+                  <Button 
+                    size="lg" 
+                    variant="secondary"
+                    className="text-lg"
+                    onClick={() => navigate("/order")}
+                  >
+                    Place Order Now
+                  </Button>
+                ) : (
+                  <Button 
+                    size="lg" 
+                    variant="secondary"
+                    className="text-lg"
+                    onClick={() => navigate("/auth")}
+                  >
+                    Get Started
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -133,6 +172,7 @@ const Index = () => {
                 category={item.category}
                 price={parseFloat(item.price_per_kg)}
                 onSelect={() => handleCategorySelect(item.category)}
+                imageUrl={categoryImages[item.category]}
               />
             ))}
           </div>

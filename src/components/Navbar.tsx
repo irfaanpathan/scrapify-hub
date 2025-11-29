@@ -60,6 +60,15 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
             <Link to="/admin/prices">
               <Button variant="ghost">Prices</Button>
             </Link>
+            <Link to="/admin/sub-categories">
+              <Button variant="ghost">Sub-Prices</Button>
+            </Link>
+            <Link to="/admin/images">
+              <Button variant="ghost">Images</Button>
+            </Link>
+            <Link to="/admin/banner">
+              <Button variant="ghost">Banner</Button>
+            </Link>
           </>
         );
       default:

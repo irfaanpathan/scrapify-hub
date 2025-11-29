@@ -12,6 +12,9 @@ import PartnerOrders from "./pages/partner/PartnerOrders";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManagePrices from "./pages/admin/ManagePrices";
 import ManageOrders from "./pages/admin/ManageOrders";
+import ManageSubCategories from "./pages/admin/ManageSubCategories";
+import ManageImages from "./pages/admin/ManageImages";
+import ManageBanner from "./pages/admin/ManageBanner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +35,9 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/prices" element={<ManagePrices />} />
           <Route path="/admin/orders" element={<ManageOrders />} />
+          <Route path="/admin/sub-categories" element={<ManageSubCategories />} />
+          <Route path="/admin/images" element={<ManageImages />} />
+          <Route path="/admin/banner" element={<ManageBanner />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
