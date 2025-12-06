@@ -91,6 +91,53 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          actual_weight: number | null
+          category: string
+          created_at: string
+          estimated_weight: number | null
+          final_price: number | null
+          id: string
+          notes: string | null
+          order_id: string
+          price_per_kg: number
+          sub_category: string
+        }
+        Insert: {
+          actual_weight?: number | null
+          category: string
+          created_at?: string
+          estimated_weight?: number | null
+          final_price?: number | null
+          id?: string
+          notes?: string | null
+          order_id: string
+          price_per_kg: number
+          sub_category: string
+        }
+        Update: {
+          actual_weight?: number | null
+          category?: string
+          created_at?: string
+          estimated_weight?: number | null
+          final_price?: number | null
+          id?: string
+          notes?: string | null
+          order_id?: string
+          price_per_kg?: number
+          sub_category?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           actual_weight: number | null
@@ -98,6 +145,7 @@ export type Database = {
           created_at: string
           customer_id: string
           estimated_weight: number | null
+          final_price: number | null
           id: string
           notes: string | null
           partner_id: string | null
@@ -116,6 +164,7 @@ export type Database = {
           created_at?: string
           customer_id: string
           estimated_weight?: number | null
+          final_price?: number | null
           id?: string
           notes?: string | null
           partner_id?: string | null
@@ -134,6 +183,7 @@ export type Database = {
           created_at?: string
           customer_id?: string
           estimated_weight?: number | null
+          final_price?: number | null
           id?: string
           notes?: string | null
           partner_id?: string | null
