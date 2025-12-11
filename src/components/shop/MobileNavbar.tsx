@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Home, Search, ShoppingCart, User, Package, Menu, X, Leaf, LogOut } from "lucide-react";
+import { Home, ShoppingCart, User, Package, Menu, Leaf, LogOut, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useCart } from "@/hooks/useCart";
+import SearchAutocomplete from "./SearchAutocomplete";
+import LanguageToggle from "./LanguageToggle";
 
 interface MobileNavbarProps {
   user: any;
@@ -18,7 +21,8 @@ interface MobileNavbarProps {
 const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavbarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useLanguage();
+  const { addItem } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -32,9 +36,17 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSearch?.(searchQuery);
+  const handleSearchSelect = (item: any) => {
+    // Add to cart or navigate to the category
+    addItem({
+      category: item.category,
+      subCategory: item.id,
+      subCategoryName: item.name,
+      pricePerKg: item.price_per_kg,
+      estimatedWeight: 1,
+      notes: "",
+    });
+    toast.success(`${item.name} added to cart!`);
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -51,7 +63,9 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
             <span className="font-bold text-lg text-foreground">SCRAPY5</span>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <LanguageToggle />
+            
             <Button
               variant="ghost"
               size="icon"
@@ -85,7 +99,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
                   {user ? (
                     <>
                       <p className="text-sm text-muted-foreground px-3 mb-2">
-                        Welcome, {user.email}
+                        {t("welcome")}, {user.email?.split("@")[0]}
                       </p>
                       <Link
                         to="/"
@@ -96,7 +110,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
                         )}
                       >
                         <Home className="h-5 w-5" />
-                        Home
+                        {t("home")}
                       </Link>
                       <Link
                         to="/order"
@@ -107,7 +121,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
                         )}
                       >
                         <Package className="h-5 w-5" />
-                        Place Order
+                        {t("placeOrder")}
                       </Link>
                       <Link
                         to="/track"
@@ -117,8 +131,19 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
                           isActive("/track") ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                         )}
                       >
-                        <Search className="h-5 w-5" />
-                        Track Order
+                        <Package className="h-5 w-5" />
+                        {t("trackOrder")}
+                      </Link>
+                      <Link
+                        to="/history"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                          isActive("/history") ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                        )}
+                      >
+                        <History className="h-5 w-5" />
+                        {t("orderHistory")}
                       </Link>
                       <Button
                         variant="ghost"
@@ -126,7 +151,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
                         onClick={handleLogout}
                       >
                         <LogOut className="h-5 w-5" />
-                        Logout
+                        {t("logout")}
                       </Button>
                     </>
                   ) : (
@@ -136,7 +161,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
                       className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary text-primary-foreground"
                     >
                       <User className="h-5 w-5" />
-                      Login / Sign Up
+                      {t("login")} / Sign Up
                     </Link>
                   )}
                 </nav>
@@ -145,18 +170,13 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
           </div>
         </div>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="px-4 pb-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search scrap items..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-10 bg-muted/50 border-0"
-            />
-          </div>
-        </form>
+        {/* Search Bar with Autocomplete */}
+        <div className="px-4 pb-3">
+          <SearchAutocomplete
+            onSelect={handleSearchSelect}
+            placeholder={t("search")}
+          />
+        </div>
       </header>
 
       {/* Bottom Navigation - Mobile */}
@@ -170,7 +190,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
             )}
           >
             <Home className="h-5 w-5" />
-            <span className="text-xs">Home</span>
+            <span className="text-xs">{t("home")}</span>
           </Link>
           
           <Link
@@ -181,7 +201,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
             )}
           >
             <Package className="h-5 w-5" />
-            <span className="text-xs">Orders</span>
+            <span className="text-xs">{t("orders")}</span>
           </Link>
 
           <button
@@ -194,7 +214,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
                 {cartItemCount}
               </span>
             )}
-            <span className="text-xs">Cart</span>
+            <span className="text-xs">{t("cart")}</span>
           </button>
 
           <Link
@@ -205,7 +225,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
             )}
           >
             <User className="h-5 w-5" />
-            <span className="text-xs">{user ? "Profile" : "Login"}</span>
+            <span className="text-xs">{user ? t("profile") : t("login")}</span>
           </Link>
         </div>
       </nav>

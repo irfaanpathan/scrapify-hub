@@ -9,17 +9,19 @@ import SubCategoryGrid from "@/components/shop/SubCategoryGrid";
 import CartSidebar from "@/components/shop/CartSidebar";
 import FloatingCartButton from "@/components/shop/FloatingCartButton";
 import { useCart } from "@/hooks/useCart";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Leaf, TrendingUp, Users } from "lucide-react";
 
-const CATEGORY_NAMES: Record<string, string> = {
-  paper: "Paper",
-  plastic: "Plastic",
-  metal: "Metal",
-  ewaste: "E-Waste",
+const CATEGORY_NAMES: Record<string, Record<string, string>> = {
+  paper: { en: "Paper", hi: "कागज़" },
+  plastic: { en: "Plastic", hi: "प्लास्टिक" },
+  metal: { en: "Metal", hi: "धातु" },
+  ewaste: { en: "E-Waste", hi: "ई-कचरा" },
 };
 
 const Index = () => {
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [categories, setCategories] = useState<Array<{ id: string; name: string; imageUrl?: string }>>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -67,7 +69,7 @@ const Index = () => {
       
       const categoryList = uniqueCategories.map((cat) => ({
         id: cat,
-        name: CATEGORY_NAMES[cat] || cat,
+        name: CATEGORY_NAMES[cat]?.[language] || CATEGORY_NAMES[cat]?.en || cat,
         imageUrl: imagesMap[cat],
       }));
 
@@ -80,7 +82,7 @@ const Index = () => {
     };
 
     fetchData();
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     if (!selectedCategory) return;
@@ -99,7 +101,7 @@ const Index = () => {
   }, [selectedCategory]);
 
   const getCategoryDisplayName = () => {
-    return CATEGORY_NAMES[selectedCategory] || selectedCategory;
+    return CATEGORY_NAMES[selectedCategory]?.[language] || CATEGORY_NAMES[selectedCategory]?.en || selectedCategory;
   };
 
   return (
@@ -140,15 +142,15 @@ const Index = () => {
           <div className="flex flex-wrap justify-center gap-8 text-sm">
             <div className="flex items-center gap-2 text-foreground">
               <Leaf className="h-5 w-5 text-primary" />
-              <span>Eco-Friendly</span>
+              <span>{t("ecoFriendly")}</span>
             </div>
             <div className="flex items-center gap-2 text-foreground">
               <TrendingUp className="h-5 w-5 text-primary" />
-              <span>Best Prices</span>
+              <span>{t("bestPrices")}</span>
             </div>
             <div className="flex items-center gap-2 text-foreground">
               <Users className="h-5 w-5 text-primary" />
-              <span>Doorstep Pickup</span>
+              <span>{t("doorstepPickup")}</span>
             </div>
           </div>
         </div>
