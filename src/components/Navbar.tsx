@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Leaf, LogOut, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+import LanguageToggle from "@/components/shop/LanguageToggle";
 
 interface NavbarProps {
   role?: "customer" | "partner" | "admin";
@@ -60,6 +60,7 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
           { to: "/", label: "Home" },
           { to: "/order", label: "Place Order" },
           { to: "/track", label: "Track Order" },
+          { to: "/history", label: "History" },
         ];
     }
   };
@@ -78,6 +79,7 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-2">
+          <LanguageToggle />
           {user ? (
             <>
               {links.map((link) => (
