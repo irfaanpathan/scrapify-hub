@@ -20,8 +20,8 @@ const categoryIcons: Record<string, React.ReactNode> = {
 
 const CategorySidebar = ({ categories, selectedCategory, onSelectCategory }: CategorySidebarProps) => {
   return (
-    <aside className="w-full md:w-56 lg:w-64 bg-card border-r border-border flex-shrink-0">
-      <div className="sticky top-0 p-4">
+    <aside className="hidden md:block w-56 lg:w-64 bg-card border-r border-border flex-shrink-0">
+      <div className="sticky top-16 p-4">
         <h2 className="text-lg font-semibold text-foreground mb-4">Categories</h2>
         <nav className="space-y-1">
           {categories.map((category) => (
