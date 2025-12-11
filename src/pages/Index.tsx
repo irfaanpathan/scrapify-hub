@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import MobileNavbar from "@/components/shop/MobileNavbar";
+import HorizontalCategories from "@/components/shop/HorizontalCategories";
 import CategorySidebar from "@/components/shop/CategorySidebar";
 import SubCategoryGrid from "@/components/shop/SubCategoryGrid";
 import CartSidebar from "@/components/shop/CartSidebar";
 import FloatingCartButton from "@/components/shop/FloatingCartButton";
+import { useCart } from "@/hooks/useCart";
 import { Leaf, TrendingUp, Users } from "lucide-react";
 
 const CATEGORY_NAMES: Record<string, string> = {
@@ -23,6 +26,7 @@ const Index = () => {
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [banner, setBanner] = useState<any>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { items } = useCart();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -100,11 +104,21 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+      {/* Desktop Navbar */}
+      <div className="hidden md:block">
+        <Navbar />
+      </div>
+      
+      {/* Mobile Navbar */}
+      <MobileNavbar
+        user={user}
+        cartItemCount={items.length}
+        onCartClick={() => setIsCartOpen(true)}
+      />
 
       {/* Hero Banner */}
       {banner?.image_url && (
-        <div className="w-full h-40 md:h-56 overflow-hidden">
+        <div className="w-full h-32 md:h-56 overflow-hidden">
           <img
             src={banner.image_url}
             alt="Home Banner"
@@ -113,8 +127,15 @@ const Index = () => {
         </div>
       )}
 
-      {/* Features Strip */}
-      <section className="bg-primary/5 border-y border-border py-4">
+      {/* Horizontal Categories - Mobile */}
+      <HorizontalCategories
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
+
+      {/* Features Strip - Desktop only */}
+      <section className="hidden md:block bg-primary/5 border-y border-border py-4">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-8 text-sm">
             <div className="flex items-center gap-2 text-foreground">
@@ -135,7 +156,7 @@ const Index = () => {
 
       {/* Main Content - Blinkit Style Layout */}
       <div className="flex-1 flex flex-col md:flex-row">
-        {/* Category Sidebar */}
+        {/* Category Sidebar - Desktop only */}
         <CategorySidebar
           categories={categories}
           selectedCategory={selectedCategory}
