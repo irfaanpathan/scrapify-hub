@@ -10,7 +10,9 @@ import { toast } from "sonner";
 import { Leaf, ArrowLeft, Smartphone } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
-const DUMMY_OTP = "123456";
+const generateRandomOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -29,6 +31,7 @@ const Auth = () => {
   const [otpPhone, setOtpPhone] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpValue, setOtpValue] = useState("");
+  const [generatedOtp, setGeneratedOtp] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,12 +118,14 @@ const Auth = () => {
       toast.error("Please enter a valid phone number");
       return;
     }
+    const newOtp = generateRandomOTP();
+    setGeneratedOtp(newOtp);
     setOtpSent(true);
-    toast.success(`OTP sent to ${otpPhone}. Use code: ${DUMMY_OTP}`);
+    toast.success(`OTP sent to ${otpPhone}. Your code: ${newOtp}`);
   };
 
   const handleVerifyOtp = async () => {
-    if (otpValue !== DUMMY_OTP) {
+    if (otpValue !== generatedOtp) {
       toast.error("Invalid OTP. Please try again.");
       return;
     }
@@ -170,6 +175,7 @@ const Auth = () => {
     setOtpSent(false);
     setOtpPhone("");
     setOtpValue("");
+    setGeneratedOtp("");
   };
 
   if (showForgotPassword) {
@@ -273,7 +279,7 @@ const Auth = () => {
                     Send OTP
                   </Button>
                   <p className="text-xs text-muted-foreground text-center">
-                    Demo OTP: <span className="font-mono font-bold text-primary">{DUMMY_OTP}</span>
+                    A random OTP will be generated and shown after you click Send OTP
                   </p>
                 </form>
               ) : (
@@ -305,7 +311,7 @@ const Auth = () => {
 
                   <div className="text-center space-y-2">
                     <p className="text-xs text-muted-foreground">
-                      Demo OTP: <span className="font-mono font-bold text-primary">{DUMMY_OTP}</span>
+                      Your OTP: <span className="font-mono font-bold text-primary">{generatedOtp}</span>
                     </p>
                     <button
                       type="button"
