@@ -7,7 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Leaf, ArrowLeft } from "lucide-react";
+import { Leaf, ArrowLeft, Smartphone } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+
+const DUMMY_OTP = "123456";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -20,6 +23,12 @@ const Auth = () => {
   const [signupPhone, setSignupPhone] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  
+  // OTP Login states
+  const [showOtpLogin, setShowOtpLogin] = useState(false);
+  const [otpPhone, setOtpPhone] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +109,69 @@ const Auth = () => {
     }
   };
 
+  const handleSendOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpPhone || otpPhone.length < 10) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+    setOtpSent(true);
+    toast.success(`OTP sent to ${otpPhone}. Use code: ${DUMMY_OTP}`);
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpValue !== DUMMY_OTP) {
+      toast.error("Invalid OTP. Please try again.");
+      return;
+    }
+
+    setIsLoading(true);
+    
+    // For demo purposes, we'll create/login with a generated email based on phone
+    const demoEmail = `${otpPhone.replace(/\D/g, '')}@otp.demo`;
+    const demoPassword = `otp_${otpPhone.replace(/\D/g, '')}_secure`;
+
+    try {
+      // Try to sign in first
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      });
+
+      if (signInError) {
+        // If sign in fails, create account
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: demoEmail,
+          password: demoPassword,
+          options: {
+            data: {
+              full_name: `User ${otpPhone.slice(-4)}`,
+              phone: otpPhone,
+              role: "customer",
+            },
+            emailRedirectTo: `${window.location.origin}/`,
+          },
+        });
+
+        if (signUpError) throw signUpError;
+      }
+
+      toast.success("Login successful!");
+      navigate("/");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to login");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetOtpFlow = () => {
+    setShowOtpLogin(false);
+    setOtpSent(false);
+    setOtpPhone("");
+    setOtpValue("");
+  };
+
   if (showForgotPassword) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted p-4">
@@ -144,6 +216,107 @@ const Auth = () => {
                   {isLoading ? "Sending..." : "Send Reset Link"}
                 </Button>
               </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (showOtpLogin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted p-4">
+        <div className="w-full max-w-md">
+          <div className="flex items-center justify-center mb-8 gap-2">
+            <div className="bg-gradient-primary p-3 rounded-xl">
+              <Leaf className="h-8 w-8 text-primary-foreground" />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground">SCRAPY5</h1>
+          </div>
+
+          <Card className="shadow-elevated">
+            <CardHeader>
+              <Button
+                variant="ghost"
+                className="w-fit p-0 mb-2"
+                onClick={resetOtpFlow}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Login
+              </Button>
+              <CardTitle className="flex items-center gap-2">
+                <Smartphone className="h-5 w-5" />
+                {otpSent ? "Enter OTP" : "Login with OTP"}
+              </CardTitle>
+              <CardDescription>
+                {otpSent 
+                  ? `Enter the 6-digit code sent to ${otpPhone}` 
+                  : "Enter your phone number to receive OTP"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!otpSent ? (
+                <form onSubmit={handleSendOtp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp-phone">Phone Number</Label>
+                    <Input
+                      id="otp-phone"
+                      type="tel"
+                      placeholder="+91 1234567890"
+                      value={otpPhone}
+                      onChange={(e) => setOtpPhone(e.target.value)}
+                      required
+                      className="h-12"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full h-12">
+                    Send OTP
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Demo OTP: <span className="font-mono font-bold text-primary">{DUMMY_OTP}</span>
+                  </p>
+                </form>
+              ) : (
+                <div className="space-y-6">
+                  <div className="flex justify-center">
+                    <InputOTP
+                      maxLength={6}
+                      value={otpValue}
+                      onChange={setOtpValue}
+                    >
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+                  
+                  <Button 
+                    onClick={handleVerifyOtp} 
+                    className="w-full h-12" 
+                    disabled={otpValue.length !== 6 || isLoading}
+                  >
+                    {isLoading ? "Verifying..." : "Verify & Login"}
+                  </Button>
+
+                  <div className="text-center space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      Demo OTP: <span className="font-mono font-bold text-primary">{DUMMY_OTP}</span>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setOtpSent(false)}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Change phone number
+                    </button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -211,6 +384,24 @@ const Auth = () => {
                     {isLoading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
+
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or</span>
+                  </div>
+                </div>
+
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12"
+                  onClick={() => setShowOtpLogin(true)}
+                >
+                  <Smartphone className="h-4 w-4 mr-2" />
+                  Login with OTP
+                </Button>
               </TabsContent>
 
               <TabsContent value="signup">
