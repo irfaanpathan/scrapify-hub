@@ -12,11 +12,24 @@ import { useCart } from "@/hooks/useCart";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Leaf, TrendingUp, Users } from "lucide-react";
 
+// Import category images
+import paperImage from "@/assets/category-paper.jpg";
+import plasticImage from "@/assets/category-plastic.jpg";
+import metalImage from "@/assets/category-metal.jpg";
+import ewasteImage from "@/assets/category-ewaste.jpg";
+
 const CATEGORY_NAMES: Record<string, Record<string, string>> = {
   paper: { en: "Paper", hi: "कागज़" },
   plastic: { en: "Plastic", hi: "प्लास्टिक" },
   metal: { en: "Metal", hi: "धातु" },
   ewaste: { en: "E-Waste", hi: "ई-कचरा" },
+};
+
+const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
+  paper: paperImage,
+  plastic: plasticImage,
+  metal: metalImage,
+  ewaste: ewasteImage,
 };
 
 const Index = () => {
@@ -70,7 +83,7 @@ const Index = () => {
       const categoryList = uniqueCategories.map((cat) => ({
         id: cat,
         name: CATEGORY_NAMES[cat]?.[language] || CATEGORY_NAMES[cat]?.en || cat,
-        imageUrl: imagesMap[cat],
+        imageUrl: imagesMap[cat] || DEFAULT_CATEGORY_IMAGES[cat],
       }));
 
       setCategories(categoryList);

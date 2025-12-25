@@ -411,60 +411,48 @@ const Auth = () => {
               </TabsContent>
 
               <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="John Doe"
-                      value={signupName}
-                      onChange={(e) => setSignupName(e.target.value)}
-                      required
-                      className="h-12"
-                    />
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground text-center mb-4">
+                    Register using your phone number with OTP verification
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-name">Full Name</Label>
+                      <Input
+                        id="signup-name"
+                        type="text"
+                        placeholder="John Doe"
+                        value={signupName}
+                        onChange={(e) => setSignupName(e.target.value)}
+                        className="h-12"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">Email (Optional)</Label>
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={signupEmail}
+                        onChange={(e) => setSignupEmail(e.target.value)}
+                        className="h-12"
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-phone">Phone Number</Label>
-                    <Input
-                      id="signup-phone"
-                      type="tel"
-                      placeholder="+91 1234567890"
-                      value={signupPhone}
-                      onChange={(e) => setSignupPhone(e.target.value)}
-                      required
-                      className="h-12"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
-                      required
-                      className="h-12"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                      required
-                      minLength={6}
-                      className="h-12"
-                      placeholder="Min 6 characters"
-                    />
-                  </div>
-                  <Button type="submit" className="w-full h-12" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Create Account"}
+
+                  <Button 
+                    className="w-full h-12"
+                    onClick={() => setShowOtpLogin(true)}
+                  >
+                    <Smartphone className="h-4 w-4 mr-2" />
+                    Continue with Phone OTP
                   </Button>
-                </form>
+                  
+                  <p className="text-xs text-muted-foreground text-center">
+                    You'll verify your phone number with a one-time password
+                  </p>
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>
