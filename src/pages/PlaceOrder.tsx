@@ -121,7 +121,7 @@ const PlaceOrder = () => {
 
       clearCart();
       toast.success("Order placed successfully!");
-      navigate("/track");
+      navigate(`/order-confirmation?orderId=${orderData.id}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to place order");
     } finally {
@@ -179,34 +179,22 @@ const PlaceOrder = () => {
                       </Button>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label className="text-xs">Estimated Weight (kg)</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          placeholder="e.g., 5.5"
-                          value={item.estimatedWeight || ""}
-                          onChange={(e) =>
-                            updateItem(item.id, {
-                              estimatedWeight: e.target.value
-                                ? parseFloat(e.target.value)
-                                : null,
-                            })
-                          }
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-xs">Notes</Label>
-                        <Input
-                          placeholder="Any notes..."
-                          value={item.notes}
-                          onChange={(e) =>
-                            updateItem(item.id, { notes: e.target.value })
-                          }
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">Estimated Weight (kg)</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        placeholder="e.g., 5.5"
+                        value={item.estimatedWeight || ""}
+                        onChange={(e) =>
+                          updateItem(item.id, {
+                            estimatedWeight: e.target.value
+                              ? parseFloat(e.target.value)
+                              : null,
+                          })
+                        }
+                      />
                     </div>
 
                     {item.estimatedWeight && (

@@ -119,7 +119,7 @@ const SubCategoryGrid = ({ subCategories, categoryName }: SubCategoryGridProps) 
               )}
               <CardContent className="p-3 md:p-4 text-center space-y-2 md:space-y-3">
                 <div 
-                  className="w-12 h-12 md:w-16 md:h-16 mx-auto bg-muted rounded-full flex items-center justify-center cursor-pointer group-hover:bg-primary/10 transition-colors"
+                  className="w-12 h-12 md:w-16 md:h-16 mx-auto bg-muted rounded-xl flex items-center justify-center cursor-pointer group-hover:bg-primary/10 transition-colors overflow-hidden"
                   onClick={() => handleAddToCart(sub)}
                 >
                   <span className="text-xl md:text-2xl">📦</span>
@@ -132,26 +132,6 @@ const SubCategoryGrid = ({ subCategories, categoryName }: SubCategoryGridProps) 
                     ₹{sub.price_per_kg}/kg
                   </p>
                 </div>
-                
-                {/* Quick weight input */}
-                <div className="flex items-center gap-1">
-                  <Input
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    placeholder="kg"
-                    value={weight}
-                    onChange={(e) => handleQuickWeight(sub, e.target.value)}
-                    className="h-8 text-xs text-center"
-                  />
-                </div>
-                
-                {/* Show estimate if weight entered */}
-                {estimate > 0 && (
-                  <p className="text-xs text-primary font-semibold">
-                    Est: ₹{estimate.toFixed(0)}
-                  </p>
-                )}
 
                 {inCart ? (
                   <Button

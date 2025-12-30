@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Leaf, ArrowLeft, Smartphone } from "lucide-react";
+import { Leaf, ArrowLeft, Smartphone, User, Mail, Phone } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const generateRandomOTP = () => {
@@ -17,55 +17,58 @@ const generateRandomOTP = () => {
 const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [signupEmail, setSignupEmail] = useState("");
-  const [signupPassword, setSignupPassword] = useState("");
-  const [signupName, setSignupName] = useState("");
-  const [signupPhone, setSignupPhone] = useState("");
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState("");
   
-  // OTP Login states
-  const [showOtpLogin, setShowOtpLogin] = useState(false);
-  const [otpPhone, setOtpPhone] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpValue, setOtpValue] = useState("");
-  const [generatedOtp, setGeneratedOtp] = useState("");
+  // Signup states
+  const [signupName, setSignupName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPhone, setSignupPhone] = useState("");
+  const [signupStep, setSignupStep] = useState<"details" | "otp">("details");
+  const [signupOtp, setSignupOtp] = useState("");
+  const [signupGeneratedOtp, setSignupGeneratedOtp] = useState("");
+  
+  // Login states
+  const [loginPhone, setLoginPhone] = useState("");
+  const [loginOtpSent, setLoginOtpSent] = useState(false);
+  const [loginOtpValue, setLoginOtpValue] = useState("");
+  const [loginGeneratedOtp, setLoginGeneratedOtp] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignupSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: loginPassword,
-      });
-
-      if (error) throw error;
-
-      toast.success("Welcome back!");
-      navigate("/");
-    } catch (error: any) {
-      if (error.message.includes("Invalid login credentials")) {
-        toast.error("Invalid email or password");
-      } else {
-        toast.error(error.message || "Failed to login");
-      }
-    } finally {
-      setIsLoading(false);
+    
+    if (!signupName.trim()) {
+      toast.error("Please enter your name");
+      return;
     }
+    if (!signupPhone || signupPhone.length < 10) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+    if (!signupEmail || !signupEmail.includes("@")) {
+      toast.error("Please enter a valid email");
+      return;
+    }
+
+    const newOtp = generateRandomOTP();
+    setSignupGeneratedOtp(newOtp);
+    setSignupStep("otp");
+    toast.success(`OTP sent to ${signupPhone}. Your code: ${newOtp}`);
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSignupVerify = async () => {
+    if (signupOtp !== signupGeneratedOtp) {
+      toast.error("Invalid OTP. Please try again.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      const demoEmail = signupEmail || `${signupPhone.replace(/\D/g, '')}@otp.demo`;
+      const demoPassword = `otp_${signupPhone.replace(/\D/g, '')}_secure`;
+
       const { error } = await supabase.auth.signUp({
-        email: signupEmail,
-        password: signupPassword,
+        email: demoEmail,
+        password: demoPassword,
         options: {
           data: {
             full_name: signupName,
@@ -82,7 +85,7 @@ const Auth = () => {
       navigate("/");
     } catch (error: any) {
       if (error.message.includes("already registered")) {
-        toast.error("This email is already registered. Try logging in.");
+        toast.error("This phone/email is already registered. Try logging in.");
       } else {
         toast.error(error.message || "Failed to create account");
       }
@@ -91,74 +94,38 @@ const Auth = () => {
     }
   };
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  const handleLoginSendOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-        redirectTo: `${window.location.origin}/auth`,
-      });
-
-      if (error) throw error;
-
-      toast.success("Password reset email sent! Check your inbox.");
-      setShowForgotPassword(false);
-      setForgotEmail("");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send reset email");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSendOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!otpPhone || otpPhone.length < 10) {
+    if (!loginPhone || loginPhone.length < 10) {
       toast.error("Please enter a valid phone number");
       return;
     }
     const newOtp = generateRandomOTP();
-    setGeneratedOtp(newOtp);
-    setOtpSent(true);
-    toast.success(`OTP sent to ${otpPhone}. Your code: ${newOtp}`);
+    setLoginGeneratedOtp(newOtp);
+    setLoginOtpSent(true);
+    toast.success(`OTP sent to ${loginPhone}. Your code: ${newOtp}`);
   };
 
-  const handleVerifyOtp = async () => {
-    if (otpValue !== generatedOtp) {
+  const handleLoginVerify = async () => {
+    if (loginOtpValue !== loginGeneratedOtp) {
       toast.error("Invalid OTP. Please try again.");
       return;
     }
 
     setIsLoading(true);
     
-    // For demo purposes, we'll create/login with a generated email based on phone
-    const demoEmail = `${otpPhone.replace(/\D/g, '')}@otp.demo`;
-    const demoPassword = `otp_${otpPhone.replace(/\D/g, '')}_secure`;
+    const demoEmail = `${loginPhone.replace(/\D/g, '')}@otp.demo`;
+    const demoPassword = `otp_${loginPhone.replace(/\D/g, '')}_secure`;
 
     try {
-      // Try to sign in first
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: demoEmail,
         password: demoPassword,
       });
 
       if (signInError) {
-        // If sign in fails, create account
-        const { error: signUpError } = await supabase.auth.signUp({
-          email: demoEmail,
-          password: demoPassword,
-          options: {
-            data: {
-              full_name: `User ${otpPhone.slice(-4)}`,
-              phone: otpPhone,
-              role: "customer",
-            },
-            emailRedirectTo: `${window.location.origin}/`,
-          },
-        });
-
-        if (signUpError) throw signUpError;
+        toast.error("Account not found. Please sign up first.");
+        return;
       }
 
       toast.success("Login successful!");
@@ -170,289 +137,221 @@ const Auth = () => {
     }
   };
 
-  const resetOtpFlow = () => {
-    setShowOtpLogin(false);
-    setOtpSent(false);
-    setOtpPhone("");
-    setOtpValue("");
-    setGeneratedOtp("");
+  const resetSignup = () => {
+    setSignupStep("details");
+    setSignupOtp("");
+    setSignupGeneratedOtp("");
   };
 
-  if (showForgotPassword) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted p-4">
-        <div className="w-full max-w-md">
-          <div className="flex items-center justify-center mb-8 gap-2">
-            <div className="bg-gradient-primary p-3 rounded-xl">
-              <Leaf className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <h1 className="text-3xl font-bold text-foreground">SCRAPY5</h1>
-          </div>
-
-          <Card className="shadow-elevated">
-            <CardHeader>
-              <Button
-                variant="ghost"
-                className="w-fit p-0 mb-2"
-                onClick={() => setShowForgotPassword(false)}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Login
-              </Button>
-              <CardTitle>Reset Password</CardTitle>
-              <CardDescription>
-                Enter your email and we'll send you a reset link
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="forgot-email">Email</Label>
-                  <Input
-                    id="forgot-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
-                    required
-                    className="h-12"
-                  />
-                </div>
-                <Button type="submit" className="w-full h-12" disabled={isLoading}>
-                  {isLoading ? "Sending..." : "Send Reset Link"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (showOtpLogin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted p-4">
-        <div className="w-full max-w-md">
-          <div className="flex items-center justify-center mb-8 gap-2">
-            <div className="bg-gradient-primary p-3 rounded-xl">
-              <Leaf className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <h1 className="text-3xl font-bold text-foreground">SCRAPY5</h1>
-          </div>
-
-          <Card className="shadow-elevated">
-            <CardHeader>
-              <Button
-                variant="ghost"
-                className="w-fit p-0 mb-2"
-                onClick={resetOtpFlow}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Login
-              </Button>
-              <CardTitle className="flex items-center gap-2">
-                <Smartphone className="h-5 w-5" />
-                {otpSent ? "Enter OTP" : "Login with OTP"}
-              </CardTitle>
-              <CardDescription>
-                {otpSent 
-                  ? `Enter the 6-digit code sent to ${otpPhone}` 
-                  : "Enter your phone number to receive OTP"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {!otpSent ? (
-                <form onSubmit={handleSendOtp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="otp-phone">Phone Number</Label>
-                    <Input
-                      id="otp-phone"
-                      type="tel"
-                      placeholder="+91 1234567890"
-                      value={otpPhone}
-                      onChange={(e) => setOtpPhone(e.target.value)}
-                      required
-                      className="h-12"
-                    />
-                  </div>
-                  <Button type="submit" className="w-full h-12">
-                    Send OTP
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    A random OTP will be generated and shown after you click Send OTP
-                  </p>
-                </form>
-              ) : (
-                <div className="space-y-6">
-                  <div className="flex justify-center">
-                    <InputOTP
-                      maxLength={6}
-                      value={otpValue}
-                      onChange={setOtpValue}
-                    >
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </div>
-                  
-                  <Button 
-                    onClick={handleVerifyOtp} 
-                    className="w-full h-12" 
-                    disabled={otpValue.length !== 6 || isLoading}
-                  >
-                    {isLoading ? "Verifying..." : "Verify & Login"}
-                  </Button>
-
-                  <div className="text-center space-y-2">
-                    <p className="text-xs text-muted-foreground">
-                      Your OTP: <span className="font-mono font-bold text-primary">{generatedOtp}</span>
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setOtpSent(false)}
-                      className="text-sm text-primary hover:underline"
-                    >
-                      Change phone number
-                    </button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  const resetLogin = () => {
+    setLoginOtpSent(false);
+    setLoginOtpValue("");
+    setLoginGeneratedOtp("");
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-muted via-background to-muted p-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center justify-center mb-8 gap-2">
-          <div className="bg-gradient-primary p-3 rounded-xl">
+        <Link to="/" className="flex items-center justify-center mb-8 gap-3">
+          <div className="bg-gradient-primary p-3 rounded-2xl shadow-lg">
             <Leaf className="h-8 w-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-bold text-foreground">SCRAPY5</h1>
         </Link>
 
-        <Card className="shadow-elevated">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl">Welcome</CardTitle>
+        <Card className="shadow-elevated border-0">
+          <CardHeader className="pb-4 text-center">
+            <CardTitle className="text-2xl">Welcome</CardTitle>
             <CardDescription>Sign in or create an account to continue</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6 h-12">
+                <TabsTrigger value="login" className="text-sm font-medium">Login</TabsTrigger>
+                <TabsTrigger value="signup" className="text-sm font-medium">Sign Up</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      required
-                      className="h-12"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="login-password">Password</Label>
-                      <button
-                        type="button"
-                        onClick={() => setShowForgotPassword(true)}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        Forgot password?
-                      </button>
+              {/* LOGIN TAB */}
+              <TabsContent value="login" className="space-y-4">
+                {!loginOtpSent ? (
+                  <form onSubmit={handleLoginSendOtp} className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="login-phone" className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        Mobile Number
+                      </Label>
+                      <Input
+                        id="login-phone"
+                        type="tel"
+                        placeholder="+91 9876543210"
+                        value={loginPhone}
+                        onChange={(e) => setLoginPhone(e.target.value)}
+                        required
+                        className="h-12 text-base"
+                      />
                     </div>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      required
-                      className="h-12"
-                    />
-                  </div>
-                  <Button type="submit" className="w-full h-12" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In"}
-                  </Button>
-                </form>
+                    <Button type="submit" className="w-full h-12 text-base font-medium">
+                      <Smartphone className="h-4 w-4 mr-2" />
+                      Send OTP
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center">
+                      We'll send you a one-time password to verify your number
+                    </p>
+                  </form>
+                ) : (
+                  <div className="space-y-6">
+                    <Button
+                      variant="ghost"
+                      className="w-fit p-0 h-auto"
+                      onClick={resetLogin}
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Change number
+                    </Button>
+                    
+                    <div className="text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Enter the 6-digit code sent to
+                      </p>
+                      <p className="font-semibold text-foreground">{loginPhone}</p>
+                    </div>
 
-                <div className="relative my-4">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or</span>
-                  </div>
-                </div>
+                    <div className="flex justify-center">
+                      <InputOTP
+                        maxLength={6}
+                        value={loginOtpValue}
+                        onChange={setLoginOtpValue}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                    
+                    <Button 
+                      onClick={handleLoginVerify} 
+                      className="w-full h-12 text-base font-medium" 
+                      disabled={loginOtpValue.length !== 6 || isLoading}
+                    >
+                      {isLoading ? "Verifying..." : "Verify & Login"}
+                    </Button>
 
-                <Button 
-                  variant="outline" 
-                  className="w-full h-12"
-                  onClick={() => setShowOtpLogin(true)}
-                >
-                  <Smartphone className="h-4 w-4 mr-2" />
-                  Login with OTP
-                </Button>
+                    <p className="text-xs text-muted-foreground text-center">
+                      Your OTP: <span className="font-mono font-bold text-primary text-sm">{loginGeneratedOtp}</span>
+                    </p>
+                  </div>
+                )}
               </TabsContent>
 
-              <TabsContent value="signup">
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground text-center mb-4">
-                    Register using your phone number with OTP verification
-                  </p>
-                  
-                  <div className="space-y-4">
+              {/* SIGNUP TAB */}
+              <TabsContent value="signup" className="space-y-4">
+                {signupStep === "details" ? (
+                  <form onSubmit={handleSignupSubmit} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-name">Full Name</Label>
+                      <Label htmlFor="signup-name" className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        Full Name
+                      </Label>
                       <Input
                         id="signup-name"
                         type="text"
                         placeholder="John Doe"
                         value={signupName}
                         onChange={(e) => setSignupName(e.target.value)}
-                        className="h-12"
+                        required
+                        className="h-12 text-base"
                       />
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email (Optional)</Label>
+                      <Label htmlFor="signup-phone" className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        Mobile Number
+                      </Label>
+                      <Input
+                        id="signup-phone"
+                        type="tel"
+                        placeholder="+91 9876543210"
+                        value={signupPhone}
+                        onChange={(e) => setSignupPhone(e.target.value)}
+                        required
+                        className="h-12 text-base"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email" className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        Email Address
+                      </Label>
                       <Input
                         id="signup-email"
                         type="email"
                         placeholder="you@example.com"
                         value={signupEmail}
                         onChange={(e) => setSignupEmail(e.target.value)}
-                        className="h-12"
+                        required
+                        className="h-12 text-base"
                       />
                     </div>
-                  </div>
 
-                  <Button 
-                    className="w-full h-12"
-                    onClick={() => setShowOtpLogin(true)}
-                  >
-                    <Smartphone className="h-4 w-4 mr-2" />
-                    Continue with Phone OTP
-                  </Button>
-                  
-                  <p className="text-xs text-muted-foreground text-center">
-                    You'll verify your phone number with a one-time password
-                  </p>
-                </div>
+                    <Button type="submit" className="w-full h-12 text-base font-medium">
+                      Continue
+                    </Button>
+                  </form>
+                ) : (
+                  <div className="space-y-6">
+                    <Button
+                      variant="ghost"
+                      className="w-fit p-0 h-auto"
+                      onClick={resetSignup}
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back to details
+                    </Button>
+                    
+                    <div className="text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Enter the 6-digit code sent to
+                      </p>
+                      <p className="font-semibold text-foreground">{signupPhone}</p>
+                    </div>
+
+                    <div className="flex justify-center">
+                      <InputOTP
+                        maxLength={6}
+                        value={signupOtp}
+                        onChange={setSignupOtp}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                    
+                    <Button 
+                      onClick={handleSignupVerify} 
+                      className="w-full h-12 text-base font-medium" 
+                      disabled={signupOtp.length !== 6 || isLoading}
+                    >
+                      {isLoading ? "Creating Account..." : "Verify & Create Account"}
+                    </Button>
+
+                    <p className="text-xs text-muted-foreground text-center">
+                      Your OTP: <span className="font-mono font-bold text-primary text-sm">{signupGeneratedOtp}</span>
+                    </p>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
