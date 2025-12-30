@@ -8,45 +8,45 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Eco-friendly green theme */
+    /* Aqua Blue theme */
     --background: 0 0% 100%;
-    --foreground: 155 30% 15%;
+    --foreground: 200 30% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 155 30% 15%;
+    --card-foreground: 200 30% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 155 30% 15%;
+    --popover-foreground: 200 30% 15%;
 
-    /* Vibrant eco green */
-    --primary: 142 71% 45%;
+    /* Vibrant aqua blue */
+    --primary: 187 85% 43%;
     --primary-foreground: 0 0% 100%;
     
-    /* Lighter green for hover states */
-    --primary-hover: 142 65% 55%;
+    /* Lighter aqua for hover states */
+    --primary-hover: 187 75% 53%;
 
-    /* Soft earth tones */
-    --secondary: 30 40% 92%;
-    --secondary-foreground: 155 30% 15%;
+    /* Soft blue tones */
+    --secondary: 200 30% 94%;
+    --secondary-foreground: 200 30% 15%;
 
-    --muted: 120 15% 95%;
-    --muted-foreground: 155 20% 40%;
+    --muted: 200 15% 95%;
+    --muted-foreground: 200 20% 40%;
 
-    /* Amber accent for CTAs */
-    --accent: 38 92% 50%;
+    /* Coral accent for CTAs */
+    --accent: 16 85% 60%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 120 15% 88%;
-    --input: 120 15% 88%;
-    --ring: 142 71% 45%;
+    --border: 200 15% 88%;
+    --input: 200 15% 88%;
+    --ring: 187 85% 43%;
 
     --radius: 0.75rem;
 
-    /* Success green */
-    --success: 142 76% 36%;
+    /* Success teal */
+    --success: 172 66% 40%;
     --success-foreground: 0 0% 100%;
 
     /* Warning amber */
@@ -54,12 +54,12 @@ All colors MUST be HSL.
     --warning-foreground: 0 0% 100%;
 
     /* Gradient definitions */
-    --gradient-primary: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(142 65% 55%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(160 65% 45%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(187 85% 43%) 0%, hsl(187 75% 53%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(187 85% 43%) 0%, hsl(200 70% 50%) 100%);
     
     /* Shadows */
-    --shadow-soft: 0 2px 8px -2px hsl(142 71% 45% / 0.15);
-    --shadow-elevated: 0 8px 24px -4px hsl(142 71% 45% / 0.2);
+    --shadow-soft: 0 2px 8px -2px hsl(187 85% 43% / 0.15);
+    --shadow-elevated: 0 8px 24px -4px hsl(187 85% 43% / 0.2);
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

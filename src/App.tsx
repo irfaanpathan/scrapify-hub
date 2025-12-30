@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import PlaceOrder from "./pages/PlaceOrder";
 import TrackOrder from "./pages/TrackOrder";
 import OrderHistory from "./pages/OrderHistory";
+import OrderConfirmation from "./pages/OrderConfirmation";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOrders from "./pages/partner/PartnerOrders";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/order" element={<PlaceOrder />} />
             <Route path="/track" element={<TrackOrder />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/history" element={<OrderHistory />} />
             <Route path="/partner" element={<PartnerDashboard />} />
             <Route path="/partner/orders" element={<PartnerOrders />} />
