@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,8 +23,7 @@ interface SubCategoryImage {
 }
 
 const ManageSubCategoryImages = () => {
-  const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { isAdmin, loading } = useAdminAuth();
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [subCategoryImages, setSubCategoryImages] = useState<Record<string, SubCategoryImage>>({});
   const [uploading, setUploading] = useState<string | null>(null);
@@ -34,15 +33,10 @@ const ManageSubCategoryImages = () => {
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-        fetchData();
-      }
-    });
-  }, [navigate]);
+    if (isAdmin) {
+      fetchData();
+    }
+  }, [isAdmin]);
 
   const fetchData = async () => {
     // Fetch subcategories
@@ -195,6 +189,18 @@ const ManageSubCategoryImages = () => {
     acc[subCat.category].push(subCat);
     return acc;
   }, {} as Record<string, SubCategory[]>);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Verifying admin access...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">

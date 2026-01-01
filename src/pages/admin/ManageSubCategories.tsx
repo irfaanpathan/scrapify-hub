@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import {
@@ -17,22 +16,16 @@ import {
 } from "@/components/ui/table";
 
 const ManageSubCategories = () => {
-  const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { isAdmin, loading } = useAdminAuth();
   const [subCategories, setSubCategories] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState<string>("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-        fetchSubCategories();
-      }
-    });
-  }, [navigate]);
+    if (isAdmin) {
+      fetchSubCategories();
+    }
+  }, [isAdmin]);
 
   const fetchSubCategories = async () => {
     const { data, error } = await supabase
@@ -88,6 +81,18 @@ const ManageSubCategories = () => {
     acc[item.category].push(item);
     return acc;
   }, {} as Record<string, any[]>);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Verifying admin access...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">

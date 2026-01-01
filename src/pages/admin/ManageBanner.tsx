@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,21 +10,15 @@ import Navbar from "@/components/Navbar";
 import { Upload, Trash2 } from "lucide-react";
 
 const ManageBanner = () => {
-  const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { isAdmin, loading } = useAdminAuth();
   const [uploading, setUploading] = useState(false);
   const [activeBanner, setActiveBanner] = useState<any>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      } else {
-        setUser(session.user);
-        fetchActiveBanner();
-      }
-    });
-  }, [navigate]);
+    if (isAdmin) {
+      fetchActiveBanner();
+    }
+  }, [isAdmin]);
 
   const fetchActiveBanner = async () => {
     const { data, error } = await supabase
@@ -101,6 +95,18 @@ const ManageBanner = () => {
       toast.error(error.message);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Verifying admin access...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
