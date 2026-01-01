@@ -53,6 +53,7 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
           { to: "/admin/prices", label: "Prices" },
           { to: "/admin/sub-categories", label: "Sub-Prices" },
           { to: "/admin/images", label: "Images" },
+          { to: "/admin/sub-category-images", label: "Sub-Images" },
           { to: "/admin/banner", label: "Banner" },
         ];
       default:
@@ -61,6 +62,7 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
           { to: "/order", label: "Place Order" },
           { to: "/track", label: "Track Order" },
           { to: "/history", label: "History" },
+          { to: "/profile", label: "Profile" },
         ];
     }
   };
