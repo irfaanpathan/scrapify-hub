@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,22 +9,16 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 const ManagePrices = () => {
-  const navigate = useNavigate();
+  const { isAdmin, loading } = useAdminAuth();
   const [prices, setPrices] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newPrice, setNewPrice] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      }
-    });
-  }, [navigate]);
-
-  useEffect(() => {
-    fetchPrices();
-  }, []);
+    if (isAdmin) {
+      fetchPrices();
+    }
+  }, [isAdmin]);
 
   const fetchPrices = async () => {
     const { data } = await supabase.from("scrap_prices").select("*").order("category");
@@ -56,6 +50,18 @@ const ManagePrices = () => {
     };
     return names[category] || category;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Verifying admin access...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">

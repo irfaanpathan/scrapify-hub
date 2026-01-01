@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { ChevronDown, ChevronUp, Edit2, Save, X } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const ManageOrders = () => {
-  const navigate = useNavigate();
+  const { isAdmin, loading } = useAdminAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [partners, setPartners] = useState<any[]>([]);
   const [orderItems, setOrderItems] = useState<Record<string, any[]>>({});
@@ -24,17 +24,11 @@ const ManageOrders = () => {
   const [newOrderFinalPrice, setNewOrderFinalPrice] = useState("");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-      }
-    });
-  }, [navigate]);
-
-  useEffect(() => {
-    fetchOrders();
-    fetchPartners();
-  }, []);
+    if (isAdmin) {
+      fetchOrders();
+      fetchPartners();
+    }
+  }, [isAdmin]);
 
   const fetchOrders = async () => {
     const { data } = await supabase
@@ -61,12 +55,21 @@ const ManageOrders = () => {
   };
 
   const fetchPartners = async () => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, full_name")
+    // Get partners from user_roles table and join with profiles
+    const { data: partnerRoles } = await supabase
+      .from("user_roles")
+      .select("user_id")
       .eq("role", "partner");
 
-    if (data) setPartners(data);
+    if (partnerRoles && partnerRoles.length > 0) {
+      const partnerIds = partnerRoles.map((r) => r.user_id);
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", partnerIds);
+
+      if (data) setPartners(data);
+    }
   };
 
   const handleAssignPartner = async (orderId: string, partnerId: string) => {
@@ -161,6 +164,18 @@ const ManageOrders = () => {
         return "bg-muted text-muted-foreground";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Verifying admin access...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
