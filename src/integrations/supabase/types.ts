@@ -215,6 +215,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           created_at: string
           email: string | null
           full_name: string
@@ -224,6 +225,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           created_at?: string
           email?: string | null
           full_name: string
@@ -233,6 +235,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           created_at?: string
           email?: string | null
           full_name?: string
@@ -290,6 +293,38 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      subcategory_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          sub_category_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          sub_category_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          sub_category_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcategory_images_sub_category_id_fkey"
+            columns: ["sub_category_id"]
+            isOneToOne: true
+            referencedRelation: "sub_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

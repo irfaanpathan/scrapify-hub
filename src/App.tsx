@@ -10,6 +10,7 @@ import PlaceOrder from "./pages/PlaceOrder";
 import TrackOrder from "./pages/TrackOrder";
 import OrderHistory from "./pages/OrderHistory";
 import OrderConfirmation from "./pages/OrderConfirmation";
+import Profile from "./pages/Profile";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOrders from "./pages/partner/PartnerOrders";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -17,6 +18,7 @@ import ManagePrices from "./pages/admin/ManagePrices";
 import ManageOrders from "./pages/admin/ManageOrders";
 import ManageSubCategories from "./pages/admin/ManageSubCategories";
 import ManageImages from "./pages/admin/ManageImages";
+import ManageSubCategoryImages from "./pages/admin/ManageSubCategoryImages";
 import ManageBanner from "./pages/admin/ManageBanner";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +38,7 @@ const App = () => (
             <Route path="/track" element={<TrackOrder />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/history" element={<OrderHistory />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/partner" element={<PartnerDashboard />} />
             <Route path="/partner/orders" element={<PartnerOrders />} />
             <Route path="/admin" element={<AdminDashboard />} />
@@ -43,6 +46,7 @@ const App = () => (
             <Route path="/admin/orders" element={<ManageOrders />} />
             <Route path="/admin/sub-categories" element={<ManageSubCategories />} />
             <Route path="/admin/images" element={<ManageImages />} />
+            <Route path="/admin/sub-category-images" element={<ManageSubCategoryImages />} />
             <Route path="/admin/banner" element={<ManageBanner />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
