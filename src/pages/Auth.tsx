@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Leaf, ArrowLeft, Smartphone, User, Mail, Phone } from "lucide-react";
+import { ArrowLeft, Smartphone, User, Mail, Phone } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import logo from "@/assets/logo.jpg";
 
 const generateRandomOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -94,16 +95,40 @@ const Auth = () => {
     }
   };
 
-  const handleLoginSendOtp = (e: React.FormEvent) => {
+  const handleLoginSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginPhone || loginPhone.length < 10) {
       toast.error("Please enter a valid phone number");
       return;
     }
-    const newOtp = generateRandomOTP();
-    setLoginGeneratedOtp(newOtp);
-    setLoginOtpSent(true);
-    toast.success(`OTP sent to ${loginPhone}. Your code: ${newOtp}`);
+
+    setIsLoading(true);
+
+    try {
+      // Check if user exists in profiles table by phone
+      const { data: profiles, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, phone")
+        .eq("phone", loginPhone)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      if (!profiles) {
+        toast.error("Account not found. Please sign up first.");
+        setIsLoading(false);
+        return;
+      }
+
+      const newOtp = generateRandomOTP();
+      setLoginGeneratedOtp(newOtp);
+      setLoginOtpSent(true);
+      toast.success(`OTP sent to ${loginPhone}. Your code: ${newOtp}`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to verify phone number");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLoginVerify = async () => {
@@ -153,10 +178,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-muted via-background to-muted p-4">
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center justify-center mb-8 gap-3">
-          <div className="bg-gradient-primary p-3 rounded-2xl shadow-lg">
-            <Leaf className="h-8 w-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">SCRAPY5</h1>
+          <img src={logo} alt="Scrapy5 Logo" className="h-16 w-auto object-contain" />
         </Link>
 
         <Card className="shadow-elevated border-0">
@@ -190,9 +212,9 @@ const Auth = () => {
                         className="h-12 text-base"
                       />
                     </div>
-                    <Button type="submit" className="w-full h-12 text-base font-medium">
+                    <Button type="submit" className="w-full h-12 text-base font-medium" disabled={isLoading}>
                       <Smartphone className="h-4 w-4 mr-2" />
-                      Send OTP
+                      {isLoading ? "Checking..." : "Send OTP"}
                     </Button>
                     <p className="text-xs text-muted-foreground text-center">
                       We'll send you a one-time password to verify your number

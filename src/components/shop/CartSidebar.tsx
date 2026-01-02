@@ -1,7 +1,6 @@
 import { ShoppingCart, Trash2, X, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
@@ -147,14 +146,6 @@ const CartSidebar = ({ isOpen, onClose, user }: CartSidebarProps) => {
                       </Button>
                     </div>
                   </div>
-
-                  {/* Notes */}
-                  <Textarea
-                    placeholder="Notes (optional)..."
-                    value={item.notes}
-                    onChange={(e) => updateItem(item.id, { notes: e.target.value })}
-                    className="min-h-[50px] text-xs"
-                  />
 
                   {/* Item estimate */}
                   {itemEstimate > 0 && (
