@@ -6,17 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Upload, Trash2, ArrowLeft } from "lucide-react";
+import { CalendarIcon, Upload, Trash2, ArrowLeft, Package, MapPin, Clock, CheckCircle2, Minus, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { useCart } from "@/hooks/useCart";
 
 const PlaceOrder = () => {
   const navigate = useNavigate();
-  const { items, removeItem, updateItem, clearCart, getTotalEstimate } = useCart();
+  const { items, removeItem, updateItem, clearCart, getTotalEstimate, getItemEstimate } = useCart();
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [address, setAddress] = useState("");
@@ -45,6 +44,21 @@ const PlaceOrder = () => {
     }
   };
 
+  const handleWeightChange = (id: string, value: string) => {
+    const weight = parseFloat(value);
+    updateItem(id, { estimatedWeight: isNaN(weight) || weight <= 0 ? null : weight });
+  };
+
+  const incrementWeight = (id: string, currentWeight: number | null) => {
+    const newWeight = (currentWeight || 0) + 0.5;
+    updateItem(id, { estimatedWeight: newWeight });
+  };
+
+  const decrementWeight = (id: string, currentWeight: number | null) => {
+    const newWeight = Math.max(0, (currentWeight || 0) - 0.5);
+    updateItem(id, { estimatedWeight: newWeight > 0 ? newWeight : null });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || items.length === 0) return;
@@ -52,7 +66,6 @@ const PlaceOrder = () => {
     setIsLoading(true);
 
     try {
-      // Upload images if any
       const imageUrls: string[] = [];
       for (const image of images) {
         const fileExt = image.name.split(".").pop();
@@ -70,10 +83,8 @@ const PlaceOrder = () => {
         imageUrls.push(publicUrl);
       }
 
-      // Get the primary category (first item's category)
       const primaryCategory = items[0].category as "paper" | "plastic" | "metal" | "ewaste";
 
-      // Create main order
       const { data: orderData, error: orderError } = await supabase
         .from("orders")
         .insert({
@@ -81,7 +92,6 @@ const PlaceOrder = () => {
           category: primaryCategory,
           pickup_address: address,
           pickup_time: pickupDate?.toISOString(),
-          notes: items.map(i => i.notes).filter(Boolean).join("; "),
           status: "pending" as const,
         })
         .select()
@@ -89,7 +99,6 @@ const PlaceOrder = () => {
 
       if (orderError) throw orderError;
 
-      // Create order items
       const orderItems = items.map((item) => ({
         order_id: orderData.id,
         category: item.category,
@@ -105,7 +114,6 @@ const PlaceOrder = () => {
 
       if (itemsError) throw itemsError;
 
-      // Insert image records
       if (imageUrls.length > 0) {
         const { error: imagesError } = await supabase
           .from("order_images")
@@ -132,201 +140,270 @@ const PlaceOrder = () => {
   const totalEstimate = getTotalEstimate();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted/30">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          className="mb-4"
-          onClick={() => navigate("/")}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Shop
-        </Button>
+      
+      {/* Header */}
+      <div className="bg-card border-b border-border sticky top-14 md:top-16 z-40">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="font-semibold text-lg">Checkout</h1>
+              <p className="text-xs text-muted-foreground">{items.length} items in cart</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Order Items */}
-          <div className="lg:col-span-2 space-y-4">
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle>Order Items ({items.length})</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-muted/50 rounded-lg p-4 space-y-3"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium text-foreground">
-                          {item.subCategoryName}
-                        </h3>
-                        <p className="text-sm text-muted-foreground capitalize">
-                          {item.category}
-                        </p>
-                        <p className="text-sm text-primary font-semibold">
-                          ₹{item.pricePerKg}/kg
-                        </p>
+      <div className="container mx-auto px-4 py-4 pb-32 md:pb-8">
+        <div className="max-w-3xl mx-auto space-y-4">
+          
+          {/* Order Items Section */}
+          <div className="bg-card rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-border flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Package className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-semibold">Your Items</h2>
+                <p className="text-xs text-muted-foreground">Review and adjust quantities</p>
+              </div>
+            </div>
+            
+            <div className="divide-y divide-border">
+              {items.map((item) => {
+                const itemEstimate = getItemEstimate(item.id);
+                
+                return (
+                  <div key={item.id} className="p-4">
+                    <div className="flex gap-4">
+                      {/* Item icon */}
+                      <div className="h-14 w-14 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                        <Package className="h-6 w-6 text-muted-foreground" />
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-xs">Estimated Weight (kg)</Label>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        placeholder="e.g., 5.5"
-                        value={item.estimatedWeight || ""}
-                        onChange={(e) =>
-                          updateItem(item.id, {
-                            estimatedWeight: e.target.value
-                              ? parseFloat(e.target.value)
-                              : null,
-                          })
-                        }
-                      />
-                    </div>
-
-                    {item.estimatedWeight && (
-                      <div className="text-right text-sm">
-                        <span className="text-muted-foreground">Subtotal: </span>
-                        <span className="font-semibold text-primary">
-                          ₹{(item.estimatedWeight * item.pricePerKg).toFixed(2)}
-                        </span>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h3 className="font-medium text-foreground">{item.subCategoryName}</h3>
+                            <p className="text-sm text-muted-foreground capitalize">{item.category}</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                            onClick={() => removeItem(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="flex items-center gap-2 bg-muted rounded-full p-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-full hover:bg-background"
+                              onClick={() => decrementWeight(item.id, item.estimatedWeight)}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                            <div className="min-w-[60px] text-center">
+                              <Input
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                placeholder="0"
+                                value={item.estimatedWeight || ""}
+                                onChange={(e) => handleWeightChange(item.id, e.target.value)}
+                                className="h-8 w-16 text-center text-sm border-0 bg-transparent focus-visible:ring-0"
+                              />
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-full hover:bg-background"
+                              onClick={() => incrementWeight(item.id, item.estimatedWeight)}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                            <span className="text-sm text-muted-foreground pr-2">kg</span>
+                          </div>
+                          
+                          <div className="text-right">
+                            <p className="text-xs text-muted-foreground">₹{item.pricePerKg}/kg</p>
+                            {itemEstimate > 0 && (
+                              <p className="font-semibold text-primary">₹{itemEstimate.toFixed(0)}</p>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Pickup Details */}
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle>Pickup Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Pickup Address</Label>
-                    <Textarea
-                      id="address"
-                      placeholder="Enter your complete address"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Pickup Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start text-left font-normal"
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {pickupDate ? format(pickupDate, "PPP") : "Select date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-background">
-                        <Calendar
-                          mode="single"
-                          selected={pickupDate}
-                          onSelect={setPickupDate}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="images">Upload Scrap Photos (Optional)</Label>
-                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                      <Input
-                        id="images"
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                      <Label htmlFor="images" className="cursor-pointer text-primary hover:underline">
-                        Click to upload images
-                      </Label>
-                      {images.length > 0 && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {images.length} file(s) selected
-                        </p>
-                      )}
                     </div>
                   </div>
-                </form>
-              </CardContent>
-            </Card>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <Card className="shadow-elevated sticky top-4">
-              <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  {items.map((item) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span className="text-muted-foreground truncate mr-2">
-                        {item.subCategoryName}
-                      </span>
-                      <span className="font-medium">
-                        {item.estimatedWeight
-                          ? `₹${(item.estimatedWeight * item.pricePerKg).toFixed(2)}`
-                          : "-"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          {/* Pickup Details Section */}
+          <div className="bg-card rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-border flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <MapPin className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-semibold">Pickup Details</h2>
+                <p className="text-xs text-muted-foreground">Where should we pick up?</p>
+              </div>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="address" className="text-sm font-medium">Pickup Address</Label>
+                <Textarea
+                  id="address"
+                  placeholder="Enter your complete address with landmarks..."
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
+                  className="min-h-[100px] resize-none bg-muted/50 border-0 focus-visible:ring-1"
+                />
+              </div>
 
-                <div className="border-t border-border pt-4">
-                  <div className="flex justify-between font-semibold">
-                    <span>Estimated Total</span>
-                    <span className="text-primary text-lg">
-                      ₹{totalEstimate.toFixed(2)}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  Pickup Date
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal h-12 bg-muted/50 border-0 hover:bg-muted"
+                    >
+                      <CalendarIcon className="mr-3 h-4 w-4 text-muted-foreground" />
+                      {pickupDate ? format(pickupDate, "EEEE, MMMM d, yyyy") : "Select pickup date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-background" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={pickupDate}
+                      onSelect={setPickupDate}
+                      disabled={(date) => date < new Date()}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="images" className="text-sm font-medium">Upload Photos (Optional)</Label>
+                <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <Input
+                    id="images"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <Label htmlFor="images" className="cursor-pointer">
+                    <span className="text-primary font-medium">Click to upload</span>
+                    <span className="text-muted-foreground"> or drag and drop</span>
+                  </Label>
+                  {images.length > 0 && (
+                    <p className="text-sm text-primary mt-2 font-medium">
+                      {images.length} file(s) selected
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Order Summary Section */}
+          <div className="bg-card rounded-2xl overflow-hidden shadow-sm">
+            <div className="p-4 border-b border-border flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-semibold">Order Summary</h2>
+                <p className="text-xs text-muted-foreground">Estimated earnings</p>
+              </div>
+            </div>
+            
+            <div className="p-4 space-y-3">
+              {items.map((item) => {
+                const itemEstimate = getItemEstimate(item.id);
+                return (
+                  <div key={item.id} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground truncate mr-2">
+                      {item.subCategoryName} {item.estimatedWeight ? `(${item.estimatedWeight}kg)` : ''}
+                    </span>
+                    <span className="font-medium shrink-0">
+                      {itemEstimate > 0 ? `₹${itemEstimate.toFixed(0)}` : "-"}
                     </span>
                   </div>
+                );
+              })}
+              
+              <div className="border-t border-border pt-3 mt-3">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Estimated Total</span>
+                  <span className="text-2xl font-bold text-primary">
+                    ₹{totalEstimate.toFixed(0)}
+                  </span>
                 </div>
-
-                <div className="bg-warning/10 border border-warning/20 rounded-lg p-3">
-                  <p className="text-xs text-warning-foreground">
-                    ⚠️ Final price may vary during doorstep inspection by partner.
-                  </p>
-                </div>
-
-                <Button
-                  className="w-full"
-                  size="lg"
-                  disabled={isLoading || !address || !pickupDate}
-                  onClick={handleSubmit}
-                >
-                  {isLoading ? "Placing Order..." : "Place Order"}
-                </Button>
-              </CardContent>
-            </Card>
+              </div>
+              
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mt-3">
+                <p className="text-xs text-amber-800 dark:text-amber-200">
+                  ⚠️ Final price will be determined after doorstep inspection by our partner.
+                </p>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Fixed Bottom Button */}
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border p-4 md:hidden">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-muted-foreground">Total</span>
+          <span className="text-xl font-bold text-primary">₹{totalEstimate.toFixed(0)}</span>
+        </div>
+        <Button
+          className="w-full h-12 text-base font-semibold rounded-xl"
+          size="lg"
+          disabled={isLoading || !address || !pickupDate}
+          onClick={handleSubmit}
+        >
+          {isLoading ? "Placing Order..." : "Place Order"}
+        </Button>
+      </div>
+
+      {/* Desktop Button */}
+      <div className="hidden md:block container mx-auto px-4 pb-8">
+        <div className="max-w-3xl mx-auto">
+          <Button
+            className="w-full h-14 text-lg font-semibold rounded-xl"
+            size="lg"
+            disabled={isLoading || !address || !pickupDate}
+            onClick={handleSubmit}
+          >
+            {isLoading ? "Placing Order..." : "Place Order"}
+          </Button>
         </div>
       </div>
     </div>

@@ -2,10 +2,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Leaf, LogOut, Menu } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import LanguageToggle from "@/components/shop/LanguageToggle";
+import logo from "@/assets/logo.jpg";
 
 interface NavbarProps {
   role?: "customer" | "partner" | "admin";
@@ -73,10 +74,7 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
     <nav className="border-b bg-background sticky top-0 z-50 shadow-soft">
       <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="bg-gradient-primary p-1.5 md:p-2 rounded-lg">
-            <Leaf className="h-4 w-4 md:h-5 md:w-5 text-primary-foreground" />
-          </div>
-          <span className="font-bold text-lg md:text-xl text-foreground">SCRAPY5</span>
+          <img src={logo} alt="Scrapy5 Logo" className="h-10 md:h-12 w-auto object-contain" />
         </Link>
 
         {/* Desktop Navigation */}
@@ -112,10 +110,7 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
             <SheetContent side="right" className="w-64">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
-                  <div className="bg-gradient-primary p-2 rounded-lg">
-                    <Leaf className="h-5 w-5 text-primary-foreground" />
-                  </div>
-                  SCRAPY5
+                  <img src={logo} alt="Scrapy5 Logo" className="h-10 w-auto object-contain" />
                 </SheetTitle>
               </SheetHeader>
               <nav className="mt-6 space-y-2">
