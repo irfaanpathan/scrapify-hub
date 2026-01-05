@@ -39,6 +39,7 @@ const Index = () => {
   const [categories, setCategories] = useState<Array<{ id: string; name: string; imageUrl?: string }>>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [subCategories, setSubCategories] = useState<any[]>([]);
+  const [subCategoryImages, setSubCategoryImages] = useState<Record<string, string>>({});
   const [banner, setBanner] = useState<any>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { items } = useCart();
@@ -71,6 +72,14 @@ const Index = () => {
       imagesData?.forEach((img) => {
         imagesMap[img.category] = img.image_url;
       });
+
+      // Fetch subcategory images
+      const { data: subCatImagesData } = await supabase.from("subcategory_images").select("*");
+      const subCatImagesMap: Record<string, string> = {};
+      subCatImagesData?.forEach((img) => {
+        subCatImagesMap[img.sub_category_id] = img.image_url;
+      });
+      setSubCategoryImages(subCatImagesMap);
 
       // Get unique categories from sub_categories
       const { data: subCatsData } = await supabase
@@ -182,6 +191,7 @@ const Index = () => {
         <SubCategoryGrid
           subCategories={subCategories}
           categoryName={getCategoryDisplayName()}
+          customImages={subCategoryImages}
         />
       </div>
 
