@@ -90,9 +90,10 @@ interface SubCategory {
 interface SubCategoryGridProps {
   subCategories: SubCategory[];
   categoryName: string;
+  customImages?: Record<string, string>;
 }
 
-const SubCategoryGrid = ({ subCategories, categoryName }: SubCategoryGridProps) => {
+const SubCategoryGrid = ({ subCategories, categoryName, customImages = {} }: SubCategoryGridProps) => {
   const { addItem, items, updateItem, removeItem, getItemEstimate } = useCart();
   const [quickWeights, setQuickWeights] = useState<Record<string, string>>({});
 
@@ -196,7 +197,7 @@ const SubCategoryGrid = ({ subCategories, categoryName }: SubCategoryGridProps) 
                   onClick={() => handleAddToCart(sub)}
                 >
                   <img 
-                    src={getSubcategoryIcon(sub.name)} 
+                    src={customImages[sub.id] || getSubcategoryIcon(sub.name)} 
                     alt={sub.name}
                     className="w-full h-full object-contain"
                   />
