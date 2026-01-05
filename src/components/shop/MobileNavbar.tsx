@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Home, ShoppingCart, User, Package, Menu, Leaf, LogOut, History } from "lucide-react";
+import { Home, ShoppingCart, User, Package, Menu, LogOut, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useCart } from "@/hooks/useCart";
 import SearchAutocomplete from "./SearchAutocomplete";
 import LanguageToggle from "./LanguageToggle";
+import logoImage from "@/assets/logo.jpg";
 
 interface MobileNavbarProps {
   user: any;
@@ -57,10 +58,11 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
       <header className="sticky top-0 z-50 bg-card border-b border-border md:hidden">
         <div className="flex items-center justify-between px-4 h-14">
           <Link to="/" className="flex items-center gap-2">
-            <div className="bg-gradient-primary p-1.5 rounded-lg">
-              <Leaf className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-lg text-foreground">SCRAPY5</span>
+            <img 
+              src={logoImage} 
+              alt="Scrapy5" 
+              className="h-10 w-auto object-contain rounded-lg"
+            />
           </Link>
 
           <div className="flex items-center gap-1">
@@ -89,10 +91,11 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
               <SheetContent side="right" className="w-72">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
-                    <div className="bg-gradient-primary p-2 rounded-lg">
-                      <Leaf className="h-5 w-5 text-primary-foreground" />
-                    </div>
-                    SCRAPY5
+                    <img 
+                      src={logoImage} 
+                      alt="Scrapy5" 
+                      className="h-10 w-auto object-contain rounded-lg"
+                    />
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="mt-6 space-y-2">
