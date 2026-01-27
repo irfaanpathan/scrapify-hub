@@ -64,16 +64,18 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const demoEmail = signupEmail || `${signupPhone.replace(/\D/g, '')}@otp.demo`;
-      const demoPassword = `otp_${signupPhone.replace(/\D/g, '')}_secure`;
+      // Always use phone-based email for auth consistency between signup and login
+      const authEmail = `${signupPhone.replace(/\D/g, '')}@otp.demo`;
+      const authPassword = `otp_${signupPhone.replace(/\D/g, '')}_secure`;
 
       const { error } = await supabase.auth.signUp({
-        email: demoEmail,
-        password: demoPassword,
+        email: authEmail,
+        password: authPassword,
         options: {
           data: {
             full_name: signupName,
             phone: signupPhone,
+            email: signupEmail, // Store real email in metadata
             role: "customer",
           },
           emailRedirectTo: `${window.location.origin}/`,
