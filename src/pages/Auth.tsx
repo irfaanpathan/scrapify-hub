@@ -99,7 +99,9 @@ const Auth = () => {
 
   const handleLoginSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginPhone || loginPhone.length < 10) {
+    const phoneDigits = loginPhone.replace(/\D/g, "");
+
+    if (!phoneDigits || phoneDigits.length < 10) {
       toast.error("Please enter a valid phone number");
       return;
     }
@@ -107,27 +109,12 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Check if user exists in profiles table by phone
-      const { data: profiles, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, phone")
-        .eq("phone", loginPhone)
-        .maybeSingle();
-
-      if (profileError) throw profileError;
-
-      if (!profiles) {
-        toast.error("Account not found. Please sign up first.");
-        setIsLoading(false);
-        return;
-      }
-
       const newOtp = generateRandomOTP();
       setLoginGeneratedOtp(newOtp);
       setLoginOtpSent(true);
       toast.success(`OTP sent to ${loginPhone}. Your code: ${newOtp}`);
     } catch (error: any) {
-      toast.error(error.message || "Failed to verify phone number");
+      toast.error(error.message || "Failed to send OTP");
     } finally {
       setIsLoading(false);
     }
