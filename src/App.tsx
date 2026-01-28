@@ -20,6 +20,7 @@ import ManageSubCategories from "./pages/admin/ManageSubCategories";
 import ManageImages from "./pages/admin/ManageImages";
 import ManageSubCategoryImages from "./pages/admin/ManageSubCategoryImages";
 import ManageBanner from "./pages/admin/ManageBanner";
+import DataPortal from "./pages/admin/DataPortal";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/admin/images" element={<ManageImages />} />
             <Route path="/admin/sub-category-images" element={<ManageSubCategoryImages />} />
             <Route path="/admin/banner" element={<ManageBanner />} />
+            <Route path="/admin/data" element={<DataPortal />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

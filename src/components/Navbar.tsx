@@ -50,6 +50,7 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
       case "admin":
         return [
           { to: "/admin", label: "Dashboard" },
+          { to: "/admin/data", label: "Data Portal" },
           { to: "/admin/orders", label: "Orders" },
           { to: "/admin/prices", label: "Prices" },
           { to: "/admin/sub-categories", label: "Sub-Prices" },
