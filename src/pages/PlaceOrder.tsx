@@ -314,30 +314,32 @@ const PlaceOrder = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="images" className="text-sm font-medium">Add Photos (Optional)</Label>
+                <Label className="text-sm font-medium">Add Photos (Optional)</Label>
                 <p className="text-xs text-muted-foreground mb-2">
                   Photos help our partner prepare better for the pickup
                 </p>
-                <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
-                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <Input
-                    id="images"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                  <Label htmlFor="images" className="cursor-pointer">
-                    <span className="text-primary font-medium">Tap to add photos</span>
-                    <span className="text-muted-foreground"> or drag and drop</span>
-                  </Label>
-                  {images.length > 0 && (
-                    <p className="text-sm text-primary mt-2 font-medium">
-                      ✓ {images.length} photo(s) added
-                    </p>
-                  )}
-                </div>
+                <Label htmlFor="images" className="cursor-pointer block">
+                  <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground hover:text-primary transition-colors" />
+                    <Input
+                      id="images"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                    <div>
+                      <span className="text-primary font-medium">Tap to add photos</span>
+                      <span className="text-muted-foreground"> or drag and drop</span>
+                    </div>
+                    {images.length > 0 && (
+                      <p className="text-sm text-primary mt-2 font-medium">
+                        ✓ {images.length} photo(s) added
+                      </p>
+                    )}
+                  </div>
+                </Label>
               </div>
             </div>
           </div>
