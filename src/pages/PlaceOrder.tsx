@@ -270,7 +270,7 @@ const PlaceOrder = () => {
                 <Label htmlFor="address" className="text-sm font-medium">Pickup Address</Label>
                 <Textarea
                   id="address"
-                  placeholder="Enter your complete address with landmarks..."
+                  placeholder="Please share your complete address including any nearby landmarks to help us find you easily 😊"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   required
@@ -290,7 +290,7 @@ const PlaceOrder = () => {
                       className="w-full justify-start text-left font-normal h-12 bg-muted/50 border-0 hover:bg-muted"
                     >
                       <CalendarIcon className="mr-3 h-4 w-4 text-muted-foreground" />
-                      {pickupDate ? format(pickupDate, "EEEE, MMMM d, yyyy") : "Select pickup date"}
+                      {pickupDate ? format(pickupDate, "EEEE, MMMM d, yyyy") : "Choose your preferred date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 bg-background" align="start">
@@ -300,13 +300,24 @@ const PlaceOrder = () => {
                       onSelect={setPickupDate}
                       disabled={(date) => date < new Date()}
                       initialFocus
+                      className="pointer-events-auto"
                     />
+                    <div className="p-3 border-t border-border">
+                      <PopoverTrigger asChild>
+                        <Button className="w-full" size="sm" disabled={!pickupDate}>
+                          Done
+                        </Button>
+                      </PopoverTrigger>
+                    </div>
                   </PopoverContent>
                 </Popover>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="images" className="text-sm font-medium">Upload Photos (Optional)</Label>
+                <Label htmlFor="images" className="text-sm font-medium">Add Photos (Optional)</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Photos help our partner prepare better for the pickup
+                </p>
                 <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
                   <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                   <Input
@@ -318,12 +329,12 @@ const PlaceOrder = () => {
                     className="hidden"
                   />
                   <Label htmlFor="images" className="cursor-pointer">
-                    <span className="text-primary font-medium">Click to upload</span>
+                    <span className="text-primary font-medium">Tap to add photos</span>
                     <span className="text-muted-foreground"> or drag and drop</span>
                   </Label>
                   {images.length > 0 && (
                     <p className="text-sm text-primary mt-2 font-medium">
-                      {images.length} file(s) selected
+                      ✓ {images.length} photo(s) added
                     </p>
                   )}
                 </div>
@@ -367,9 +378,9 @@ const PlaceOrder = () => {
                 </div>
               </div>
               
-              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3 mt-3">
-                <p className="text-xs text-amber-800 dark:text-amber-200">
-                  ⚠️ Final price will be determined after doorstep inspection by our partner.
+              <div className="bg-primary/5 border border-primary/10 rounded-xl p-3 mt-3">
+                <p className="text-xs text-muted-foreground">
+                  💡 The final amount may vary slightly based on actual weight measured during pickup. No worries—our partner will confirm everything with you!
                 </p>
               </div>
             </div>
