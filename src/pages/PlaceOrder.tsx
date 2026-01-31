@@ -18,8 +18,13 @@ const PlaceOrder = () => {
   const { items, removeItem, updateItem, clearCart, getTotalEstimate, getItemEstimate } = useCart();
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [address, setAddress] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [landmark, setLandmark] = useState("");
+  const [city, setCity] = useState("");
+  const [pincode, setPincode] = useState("");
   const [pickupDate, setPickupDate] = useState<Date>();
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [images, setImages] = useState<File[]>([]);
 
   useEffect(() => {
@@ -84,13 +89,22 @@ const PlaceOrder = () => {
       }
 
       const primaryCategory = items[0].category as "paper" | "plastic" | "metal" | "ewaste";
+      
+      // Combine address fields into full address
+      const fullAddress = [
+        addressLine1,
+        addressLine2,
+        landmark ? `Near ${landmark}` : "",
+        city,
+        pincode
+      ].filter(Boolean).join(", ");
 
       const { data: orderData, error: orderError } = await supabase
         .from("orders")
         .insert({
           customer_id: user.id,
           category: primaryCategory,
-          pickup_address: address,
+          pickup_address: fullAddress,
           pickup_time: pickupDate?.toISOString(),
           status: "pending" as const,
         })
@@ -266,16 +280,51 @@ const PlaceOrder = () => {
             </div>
             
             <div className="p-4 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="address" className="text-sm font-medium">Pickup Address</Label>
-                <Textarea
-                  id="address"
-                  placeholder="Please share your complete address including any nearby landmarks to help us find you easily 😊"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  required
-                  className="min-h-[100px] resize-none bg-muted/50 border-0 focus-visible:ring-1"
-                />
+              {/* Address Fields - Zepto/Amazon Style */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Pickup Address</Label>
+                
+                <div className="space-y-3">
+                  <Input
+                    placeholder="House/Flat/Block No. *"
+                    value={addressLine1}
+                    onChange={(e) => setAddressLine1(e.target.value)}
+                    required
+                    className="h-12 bg-muted/50 border-0 focus-visible:ring-1"
+                  />
+                  
+                  <Input
+                    placeholder="Apartment/Road/Area"
+                    value={addressLine2}
+                    onChange={(e) => setAddressLine2(e.target.value)}
+                    className="h-12 bg-muted/50 border-0 focus-visible:ring-1"
+                  />
+                  
+                  <Input
+                    placeholder="Nearby Landmark (e.g., Near Park, Opposite School)"
+                    value={landmark}
+                    onChange={(e) => setLandmark(e.target.value)}
+                    className="h-12 bg-muted/50 border-0 focus-visible:ring-1"
+                  />
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      placeholder="City *"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      required
+                      className="h-12 bg-muted/50 border-0 focus-visible:ring-1"
+                    />
+                    <Input
+                      placeholder="Pincode *"
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value)}
+                      required
+                      maxLength={6}
+                      className="h-12 bg-muted/50 border-0 focus-visible:ring-1"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -283,7 +332,7 @@ const PlaceOrder = () => {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   Pickup Date
                 </Label>
-                <Popover>
+                <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -293,7 +342,7 @@ const PlaceOrder = () => {
                       {pickupDate ? format(pickupDate, "EEEE, MMMM d, yyyy") : "Choose your preferred date"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-background" align="start">
+                  <PopoverContent className="w-auto p-0 bg-background" align="start" side="bottom" sideOffset={4}>
                     <Calendar
                       mode="single"
                       selected={pickupDate}
@@ -303,11 +352,14 @@ const PlaceOrder = () => {
                       className="pointer-events-auto"
                     />
                     <div className="p-3 border-t border-border">
-                      <PopoverTrigger asChild>
-                        <Button className="w-full" size="sm" disabled={!pickupDate}>
-                          Done
-                        </Button>
-                      </PopoverTrigger>
+                      <Button 
+                        className="w-full" 
+                        size="sm" 
+                        disabled={!pickupDate}
+                        onClick={() => setDatePickerOpen(false)}
+                      >
+                        Done
+                      </Button>
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -399,7 +451,7 @@ const PlaceOrder = () => {
         <Button
           className="w-full h-12 text-base font-semibold rounded-xl"
           size="lg"
-          disabled={isLoading || !address || !pickupDate}
+          disabled={isLoading || !addressLine1 || !city || !pincode || !pickupDate}
           onClick={handleSubmit}
         >
           {isLoading ? "Placing Order..." : "Place Order"}
@@ -412,7 +464,7 @@ const PlaceOrder = () => {
           <Button
             className="w-full h-14 text-lg font-semibold rounded-xl"
             size="lg"
-            disabled={isLoading || !address || !pickupDate}
+            disabled={isLoading || !addressLine1 || !city || !pincode || !pickupDate}
             onClick={handleSubmit}
           >
             {isLoading ? "Placing Order..." : "Place Order"}
