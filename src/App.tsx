@@ -13,6 +13,7 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import Profile from "./pages/Profile";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOrders from "./pages/partner/PartnerOrders";
+import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManagePrices from "./pages/admin/ManagePrices";
 import ManageOrders from "./pages/admin/ManageOrders";
@@ -21,6 +22,7 @@ import ManageImages from "./pages/admin/ManageImages";
 import ManageSubCategoryImages from "./pages/admin/ManageSubCategoryImages";
 import ManageBanner from "./pages/admin/ManageBanner";
 import DataPortal from "./pages/admin/DataPortal";
+import CustomerImages from "./pages/admin/CustomerImages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/partner" element={<PartnerDashboard />} />
             <Route path="/partner/orders" element={<PartnerOrders />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/prices" element={<ManagePrices />} />
             <Route path="/admin/orders" element={<ManageOrders />} />
@@ -50,6 +53,7 @@ const App = () => (
             <Route path="/admin/sub-category-images" element={<ManageSubCategoryImages />} />
             <Route path="/admin/banner" element={<ManageBanner />} />
             <Route path="/admin/data" element={<DataPortal />} />
+            <Route path="/admin/customer-images" element={<CustomerImages />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
