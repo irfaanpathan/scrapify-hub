@@ -15,7 +15,7 @@ export const useAdminAuth = () => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          navigate("/auth");
+          navigate("/admin-login");
           return;
         }
 
@@ -32,13 +32,13 @@ export const useAdminAuth = () => {
         if (error) {
           console.error("Error checking admin role:", error);
           toast.error("Error verifying admin access");
-          navigate("/");
+          navigate("/admin-login");
           return;
         }
 
         if (!roleData) {
           toast.error("Access denied. Admin privileges required.");
-          navigate("/");
+          navigate("/admin-login");
           return;
         }
 
@@ -46,7 +46,7 @@ export const useAdminAuth = () => {
       } catch (error) {
         console.error("Error in admin auth check:", error);
         toast.error("Authentication error");
-        navigate("/");
+        navigate("/admin-login");
       } finally {
         setLoading(false);
       }
