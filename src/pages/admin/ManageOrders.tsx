@@ -174,7 +174,11 @@ const ManageOrders = () => {
   }
 
   if (!isAdmin) {
-    return null;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Redirecting to admin login...</p>
+      </div>
+    );
   }
 
   return (
