@@ -1,0 +1,1 @@
+ALTER TYPE public.scrap_category ADD VALUE IF NOT EXISTS 'others';

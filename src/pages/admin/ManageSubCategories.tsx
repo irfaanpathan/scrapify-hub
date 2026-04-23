@@ -69,6 +69,8 @@ const ManageSubCategories = () => {
         return "Metal";
       case "ewaste":
         return "E-Waste";
+      case "others":
+        return "Others";
       default:
         return category;
     }

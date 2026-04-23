@@ -565,7 +565,7 @@ export type Database = {
         | "weighed"
         | "paid"
         | "completed"
-      scrap_category: "paper" | "plastic" | "metal" | "ewaste"
+      scrap_category: "paper" | "plastic" | "metal" | "ewaste" | "others"
       user_role: "customer" | "partner" | "admin"
     }
     CompositeTypes: {
@@ -703,7 +703,7 @@ export const Constants = {
         "paid",
         "completed",
       ],
-      scrap_category: ["paper", "plastic", "metal", "ewaste"],
+      scrap_category: ["paper", "plastic", "metal", "ewaste", "others"],
       user_role: ["customer", "partner", "admin"],
     },
   },

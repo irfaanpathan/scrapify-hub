@@ -17,19 +17,24 @@ import paperImage from "@/assets/category-paper.jpg";
 import plasticImage from "@/assets/category-plastic.jpg";
 import metalImage from "@/assets/category-metal.jpg";
 import ewasteImage from "@/assets/category-ewaste.jpg";
+import othersImage from "@/assets/category-others.jpg";
 
 const CATEGORY_NAMES: Record<string, Record<string, string>> = {
   paper: { en: "Paper", hi: "कागज़" },
   plastic: { en: "Plastic", hi: "प्लास्टिक" },
   metal: { en: "Metal", hi: "धातु" },
   ewaste: { en: "E-Waste", hi: "ई-कचरा" },
+  others: { en: "Others", hi: "अन्य" },
 };
+
+const CATEGORY_ORDER = ["paper", "plastic", "metal", "ewaste", "others"];
 
 const DEFAULT_CATEGORY_IMAGES: Record<string, string> = {
   paper: paperImage,
   plastic: plasticImage,
   metal: metalImage,
   ewaste: ewasteImage,
+  others: othersImage,
 };
 
 const Index = () => {
@@ -87,7 +92,8 @@ const Index = () => {
         .select("category")
         .order("category");
       
-      const uniqueCategories = [...new Set(subCatsData?.map((s) => s.category) || [])];
+      const uniqueCategories = [...new Set(subCatsData?.map((s) => s.category) || [])]
+        .sort((a, b) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b));
       
       const categoryList = uniqueCategories.map((cat) => ({
         id: cat,
