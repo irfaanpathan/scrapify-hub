@@ -92,7 +92,8 @@ const Index = () => {
         .select("category")
         .order("category");
       
-      const uniqueCategories = [...new Set(subCatsData?.map((s) => s.category) || [])];
+      const uniqueCategories = [...new Set(subCatsData?.map((s) => s.category) || [])]
+        .sort((a, b) => CATEGORY_ORDER.indexOf(a) - CATEGORY_ORDER.indexOf(b));
       
       const categoryList = uniqueCategories.map((cat) => ({
         id: cat,
