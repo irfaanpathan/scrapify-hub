@@ -61,7 +61,7 @@ const AdminLogin = () => {
       }
 
       toast.success("Welcome to Admin Panel");
-      navigate("/admin");
+      navigate("/admin/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Login failed");
     } finally {
