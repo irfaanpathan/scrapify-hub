@@ -11,6 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ChevronDown, ChevronUp, Edit2, Save, X } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AdminOrderTimeline, { ORDER_STEPS } from "@/components/admin/AdminOrderTimeline";
+
+type StatusFilter = "all" | "pending" | "in_progress" | "completed";
 
 const ManageOrders = () => {
   const { isAdmin, loading } = useAdminAuth();
@@ -22,6 +26,8 @@ const ManageOrders = () => {
   const [newFinalPrice, setNewFinalPrice] = useState("");
   const [editingOrderPrice, setEditingOrderPrice] = useState<string | null>(null);
   const [newOrderFinalPrice, setNewOrderFinalPrice] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAdmin) {
@@ -82,6 +88,23 @@ const ManageOrders = () => {
       toast.error("Failed to assign partner");
     } else {
       toast.success("Partner assigned successfully");
+      fetchOrders();
+    }
+  };
+
+  const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
+    setUpdatingStatus(orderId);
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: newStatus as any })
+      .eq("id", orderId);
+
+    setUpdatingStatus(null);
+    if (error) {
+      toast.error("Failed to update status");
+    } else {
+      const stepLabel = ORDER_STEPS.find((s) => s.key === newStatus)?.label || newStatus;
+      toast.success(`Status updated to ${stepLabel}`);
       fetchOrders();
     }
   };
@@ -185,10 +208,33 @@ const ManageOrders = () => {
     <div className="min-h-screen bg-background">
       <Navbar role="admin" />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Manage All Orders</h1>
+        <h1 className="text-3xl font-bold mb-2">Manage All Orders</h1>
+        <p className="text-muted-foreground mb-6">Track and update order status across all stages</p>
+
+        <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)} className="mb-6">
+          <TabsList>
+            <TabsTrigger value="all">All ({orders.length})</TabsTrigger>
+            <TabsTrigger value="pending">
+              Pending ({orders.filter((o) => o.status === "pending").length})
+            </TabsTrigger>
+            <TabsTrigger value="in_progress">
+              In Progress ({orders.filter((o) => !["pending", "completed"].includes(o.status)).length})
+            </TabsTrigger>
+            <TabsTrigger value="completed">
+              Completed ({orders.filter((o) => o.status === "completed").length})
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <div className="space-y-4">
-          {orders.map((order) => {
+          {orders
+            .filter((order) => {
+              if (statusFilter === "all") return true;
+              if (statusFilter === "pending") return order.status === "pending";
+              if (statusFilter === "completed") return order.status === "completed";
+              return !["pending", "completed"].includes(order.status);
+            })
+            .map((order) => {
             const items = orderItems[order.id] || [];
             const isExpanded = expandedOrders.has(order.id);
 
@@ -223,10 +269,43 @@ const ManageOrders = () => {
                     </div>
                   </div>
 
+                  {/* Order Status Management Timeline */}
+                  <div className="border border-border rounded-lg p-4 bg-card">
+                    <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                      <h4 className="font-semibold text-sm">Order Status Management</h4>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-muted-foreground">Quick set:</Label>
+                        <Select
+                          value={order.status}
+                          onValueChange={(value) => handleUpdateOrderStatus(order.id, value)}
+                          disabled={updatingStatus === order.id}
+                        >
+                          <SelectTrigger className="w-44 h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {ORDER_STEPS.map((step) => (
+                              <SelectItem key={step.key} value={step.key}>
+                                {step.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <AdminOrderTimeline
+                      status={order.status}
+                      createdAt={order.created_at}
+                      updatedAt={order.updated_at}
+                      onStatusChange={(newStatus) => handleUpdateOrderStatus(order.id, newStatus)}
+                      disabled={updatingStatus === order.id}
+                    />
+                  </div>
+
                   {/* Order Final Price Override */}
                   <div className="bg-muted/50 rounded-lg p-4">
                     <div className="flex items-center justify-between">
-                      <div>
+
                         <p className="text-sm text-muted-foreground">Order Final Price</p>
                         <p className="font-semibold text-lg text-primary">
                           {order.final_price ? `₹${order.final_price}` : "Not set"}
