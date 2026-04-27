@@ -92,6 +92,23 @@ const ManageOrders = () => {
     }
   };
 
+  const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
+    setUpdatingStatus(orderId);
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: newStatus as any })
+      .eq("id", orderId);
+
+    setUpdatingStatus(null);
+    if (error) {
+      toast.error("Failed to update status");
+    } else {
+      const stepLabel = ORDER_STEPS.find((s) => s.key === newStatus)?.label || newStatus;
+      toast.success(`Status updated to ${stepLabel}`);
+      fetchOrders();
+    }
+  };
+
   const handleUpdateItemFinalPrice = async (orderId: string, itemId: string) => {
     const price = parseFloat(newFinalPrice);
     if (isNaN(price) || price < 0) {
