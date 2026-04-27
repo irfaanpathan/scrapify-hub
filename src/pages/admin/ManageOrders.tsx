@@ -269,9 +269,42 @@ const ManageOrders = () => {
                     </div>
                   </div>
 
+                  {/* Order Status Management Timeline */}
+                  <div className="border border-border rounded-lg p-4 bg-card">
+                    <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                      <h4 className="font-semibold text-sm">Order Status Management</h4>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-muted-foreground">Quick set:</Label>
+                        <Select
+                          value={order.status}
+                          onValueChange={(value) => handleUpdateOrderStatus(order.id, value)}
+                          disabled={updatingStatus === order.id}
+                        >
+                          <SelectTrigger className="w-44 h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {ORDER_STEPS.map((step) => (
+                              <SelectItem key={step.key} value={step.key}>
+                                {step.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <AdminOrderTimeline
+                      status={order.status}
+                      createdAt={order.created_at}
+                      updatedAt={order.updated_at}
+                      onStatusChange={(newStatus) => handleUpdateOrderStatus(order.id, newStatus)}
+                      disabled={updatingStatus === order.id}
+                    />
+                  </div>
+
                   {/* Order Final Price Override */}
                   <div className="bg-muted/50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
+
                       <div>
                         <p className="text-sm text-muted-foreground">Order Final Price</p>
                         <p className="font-semibold text-lg text-primary">
