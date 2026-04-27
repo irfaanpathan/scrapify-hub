@@ -304,8 +304,8 @@ const ManageOrders = () => {
 
                   {/* Order Final Price Override */}
                   <div className="bg-muted/50 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
 
-                      <div>
                         <p className="text-sm text-muted-foreground">Order Final Price</p>
                         <p className="font-semibold text-lg text-primary">
                           {order.final_price ? `₹${order.final_price}` : "Not set"}
