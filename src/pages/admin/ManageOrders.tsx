@@ -11,6 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ChevronDown, ChevronUp, Edit2, Save, X } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AdminOrderTimeline, { ORDER_STEPS } from "@/components/admin/AdminOrderTimeline";
+
+type StatusFilter = "all" | "pending" | "in_progress" | "completed";
 
 const ManageOrders = () => {
   const { isAdmin, loading } = useAdminAuth();
@@ -22,6 +26,8 @@ const ManageOrders = () => {
   const [newFinalPrice, setNewFinalPrice] = useState("");
   const [editingOrderPrice, setEditingOrderPrice] = useState<string | null>(null);
   const [newOrderFinalPrice, setNewOrderFinalPrice] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAdmin) {
