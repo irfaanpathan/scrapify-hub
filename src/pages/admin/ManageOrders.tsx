@@ -208,10 +208,33 @@ const ManageOrders = () => {
     <div className="min-h-screen bg-background">
       <Navbar role="admin" />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Manage All Orders</h1>
+        <h1 className="text-3xl font-bold mb-2">Manage All Orders</h1>
+        <p className="text-muted-foreground mb-6">Track and update order status across all stages</p>
+
+        <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)} className="mb-6">
+          <TabsList>
+            <TabsTrigger value="all">All ({orders.length})</TabsTrigger>
+            <TabsTrigger value="pending">
+              Pending ({orders.filter((o) => o.status === "pending").length})
+            </TabsTrigger>
+            <TabsTrigger value="in_progress">
+              In Progress ({orders.filter((o) => !["pending", "completed"].includes(o.status)).length})
+            </TabsTrigger>
+            <TabsTrigger value="completed">
+              Completed ({orders.filter((o) => o.status === "completed").length})
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <div className="space-y-4">
-          {orders.map((order) => {
+          {orders
+            .filter((order) => {
+              if (statusFilter === "all") return true;
+              if (statusFilter === "pending") return order.status === "pending";
+              if (statusFilter === "completed") return order.status === "completed";
+              return !["pending", "completed"].includes(order.status);
+            })
+            .map((order) => {
             const items = orderItems[order.id] || [];
             const isExpanded = expandedOrders.has(order.id);
 
