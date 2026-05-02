@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ChevronDown, ChevronUp, Edit2, Save, X, ImageIcon, ZoomIn } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit2, Save, X, ImageIcon, ZoomIn, ChevronLeft, ChevronRight } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -23,7 +23,8 @@ const ManageOrders = () => {
   const [partners, setPartners] = useState<any[]>([]);
   const [orderItems, setOrderItems] = useState<Record<string, any[]>>({});
   const [orderImages, setOrderImages] = useState<Record<string, string[]>>({});
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<string[] | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
   const [editingPrice, setEditingPrice] = useState<{ orderId: string; itemId: string } | null>(null);
   const [newFinalPrice, setNewFinalPrice] = useState("");
@@ -292,32 +293,35 @@ const ManageOrders = () => {
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-semibold text-sm flex items-center gap-2">
                           <ImageIcon className="h-4 w-4" />
-                          Customer Images ({orderImages[order.id].length})
+                          Customer Image{orderImages[order.id].length > 1 ? "s" : ""} ({orderImages[order.id].length})
                         </h4>
                       </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
-                        {orderImages[order.id].map((url, idx) => (
-                          <button
-                            key={`${order.id}-img-${idx}`}
-                            type="button"
-                            onClick={() => setPreviewImage(url)}
-                            className="group relative aspect-square overflow-hidden rounded-md border border-border bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
-                          >
-                            <img
-                              src={url}
-                              alt={`Scrap upload ${idx + 1}`}
-                              loading="lazy"
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                              onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
-                              }}
-                            />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                              <ZoomIn className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </div>
-                          </button>
-                        ))}
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGalleryImages(orderImages[order.id]);
+                          setGalleryIndex(0);
+                        }}
+                        className="group relative block w-full max-w-xs aspect-square overflow-hidden rounded-md border border-border bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <img
+                          src={orderImages[order.id][0]}
+                          alt="Scrap cover"
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                          <ZoomIn className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        {orderImages[order.id].length > 1 && (
+                          <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                            +{orderImages[order.id].length - 1} more
+                          </span>
+                        )}
+                      </button>
                     </div>
                   )}
 
@@ -542,17 +546,81 @@ const ManageOrders = () => {
         </div>
       </div>
 
-      <Dialog open={!!previewImage} onOpenChange={(open) => !open && setPreviewImage(null)}>
-        <DialogContent className="max-w-4xl p-2">
-          {previewImage && (
-            <img
-              src={previewImage}
-              alt="Scrap preview"
-              className="w-full h-auto max-h-[85vh] object-contain rounded"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
-              }}
-            />
+      <Dialog
+        open={!!galleryImages}
+        onOpenChange={(open) => {
+          if (!open) {
+            setGalleryImages(null);
+            setGalleryIndex(0);
+          }
+        }}
+      >
+        <DialogContent className="max-w-5xl p-4">
+          {galleryImages && galleryImages.length > 0 && (
+            <div className="space-y-3">
+              <div className="relative bg-muted rounded-md flex items-center justify-center">
+                <img
+                  src={galleryImages[galleryIndex]}
+                  alt={`Scrap ${galleryIndex + 1}`}
+                  className="w-full h-auto max-h-[70vh] object-contain rounded"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+                  }}
+                />
+                {galleryImages.length > 1 && (
+                  <>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="secondary"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full shadow"
+                      onClick={() =>
+                        setGalleryIndex((i) => (i - 1 + galleryImages.length) % galleryImages.length)
+                      }
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="secondary"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full shadow"
+                      onClick={() => setGalleryIndex((i) => (i + 1) % galleryImages.length)}
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                    <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                      {galleryIndex + 1} / {galleryImages.length}
+                    </span>
+                  </>
+                )}
+              </div>
+              {galleryImages.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {galleryImages.map((url, idx) => (
+                    <button
+                      key={`thumb-${idx}`}
+                      type="button"
+                      onClick={() => setGalleryIndex(idx)}
+                      className={`shrink-0 h-16 w-16 rounded-md overflow-hidden border-2 transition ${
+                        idx === galleryIndex ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt={`Thumb ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+                        }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </DialogContent>
       </Dialog>
