@@ -47,8 +47,22 @@ const ManageOrders = () => {
 
     if (data) {
       setOrders(data);
-      // Fetch order items for each order
-      data.forEach((order) => fetchOrderItems(order.id));
+      // Fetch order items + images for each order
+      data.forEach((order) => {
+        fetchOrderItems(order.id);
+        fetchOrderImages(order.id);
+      });
+    }
+  };
+
+  const fetchOrderImages = async (orderId: string) => {
+    const { data } = await supabase
+      .from("order_images")
+      .select("image_url")
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: true });
+    if (data) {
+      setOrderImages((prev) => ({ ...prev, [orderId]: data.map((d) => d.image_url) }));
     }
   };
 
