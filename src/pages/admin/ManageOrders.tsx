@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ChevronDown, ChevronUp, Edit2, Save, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit2, Save, X, ImageIcon, ZoomIn } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import AdminOrderTimeline, { ORDER_STEPS } from "@/components/admin/AdminOrderTimeline";
 
 type StatusFilter = "all" | "pending" | "in_progress" | "completed";
@@ -21,6 +22,8 @@ const ManageOrders = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [partners, setPartners] = useState<any[]>([]);
   const [orderItems, setOrderItems] = useState<Record<string, any[]>>({});
+  const [orderImages, setOrderImages] = useState<Record<string, string[]>>({});
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
   const [editingPrice, setEditingPrice] = useState<{ orderId: string; itemId: string } | null>(null);
   const [newFinalPrice, setNewFinalPrice] = useState("");
@@ -44,8 +47,22 @@ const ManageOrders = () => {
 
     if (data) {
       setOrders(data);
-      // Fetch order items for each order
-      data.forEach((order) => fetchOrderItems(order.id));
+      // Fetch order items + images for each order
+      data.forEach((order) => {
+        fetchOrderItems(order.id);
+        fetchOrderImages(order.id);
+      });
+    }
+  };
+
+  const fetchOrderImages = async (orderId: string) => {
+    const { data } = await supabase
+      .from("order_images")
+      .select("image_url")
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: true });
+    if (data) {
+      setOrderImages((prev) => ({ ...prev, [orderId]: data.map((d) => d.image_url) }));
     }
   };
 
@@ -269,6 +286,41 @@ const ManageOrders = () => {
                     </div>
                   </div>
 
+                  {/* Customer Uploaded Images */}
+                  {(orderImages[order.id]?.length ?? 0) > 0 && (
+                    <div className="border border-border rounded-lg p-4 bg-card">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-sm flex items-center gap-2">
+                          <ImageIcon className="h-4 w-4" />
+                          Customer Images ({orderImages[order.id].length})
+                        </h4>
+                      </div>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
+                        {orderImages[order.id].map((url, idx) => (
+                          <button
+                            key={`${order.id}-img-${idx}`}
+                            type="button"
+                            onClick={() => setPreviewImage(url)}
+                            className="group relative aspect-square overflow-hidden rounded-md border border-border bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                          >
+                            <img
+                              src={url}
+                              alt={`Scrap upload ${idx + 1}`}
+                              loading="lazy"
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+                              }}
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                              <ZoomIn className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Order Status Management Timeline */}
                   <div className="border border-border rounded-lg p-4 bg-card">
                     <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
@@ -489,6 +541,21 @@ const ManageOrders = () => {
           })}
         </div>
       </div>
+
+      <Dialog open={!!previewImage} onOpenChange={(open) => !open && setPreviewImage(null)}>
+        <DialogContent className="max-w-4xl p-2">
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Scrap preview"
+              className="w-full h-auto max-h-[85vh] object-contain rounded"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
