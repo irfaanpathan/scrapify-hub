@@ -293,32 +293,35 @@ const ManageOrders = () => {
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-semibold text-sm flex items-center gap-2">
                           <ImageIcon className="h-4 w-4" />
-                          Customer Images ({orderImages[order.id].length})
+                          Customer Image{orderImages[order.id].length > 1 ? "s" : ""} ({orderImages[order.id].length})
                         </h4>
                       </div>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
-                        {orderImages[order.id].map((url, idx) => (
-                          <button
-                            key={`${order.id}-img-${idx}`}
-                            type="button"
-                            onClick={() => setPreviewImage(url)}
-                            className="group relative aspect-square overflow-hidden rounded-md border border-border bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
-                          >
-                            <img
-                              src={url}
-                              alt={`Scrap upload ${idx + 1}`}
-                              loading="lazy"
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                              onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
-                              }}
-                            />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                              <ZoomIn className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </div>
-                          </button>
-                        ))}
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setGalleryImages(orderImages[order.id]);
+                          setGalleryIndex(0);
+                        }}
+                        className="group relative block w-full max-w-xs aspect-square overflow-hidden rounded-md border border-border bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <img
+                          src={orderImages[order.id][0]}
+                          alt="Scrap cover"
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                          <ZoomIn className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        {orderImages[order.id].length > 1 && (
+                          <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                            +{orderImages[order.id].length - 1} more
+                          </span>
+                        )}
+                      </button>
                     </div>
                   )}
 
