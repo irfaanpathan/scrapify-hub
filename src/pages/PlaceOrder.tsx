@@ -43,10 +43,33 @@ const PlaceOrder = () => {
     }
   }, [items.length, user, navigate]);
 
+  const MAX_IMAGES = 5;
+  const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImages(Array.from(e.target.files));
+    if (!e.target.files) return;
+    const selected = Array.from(e.target.files);
+
+    const invalid = selected.filter((f) => !ALLOWED_TYPES.includes(f.type));
+    if (invalid.length > 0) {
+      toast.error("Only JPG, JPEG, PNG, or WEBP images are allowed");
+      e.target.value = "";
+      return;
     }
+
+    const combined = [...images, ...selected];
+    if (combined.length > MAX_IMAGES) {
+      toast.error(`You can upload a maximum of ${MAX_IMAGES} images`);
+      e.target.value = "";
+      return;
+    }
+
+    setImages(combined);
+    e.target.value = "";
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleWeightChange = (id: string, value: string) => {
@@ -368,16 +391,17 @@ const PlaceOrder = () => {
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Add Photos (Optional)</Label>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Photos help our partner prepare better for the pickup
+                  Photos help our partner prepare better for the pickup (up to {MAX_IMAGES} images)
                 </p>
-                <Label htmlFor="images" className="cursor-pointer block">
-                  <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+                <Label htmlFor="images" className={`block ${images.length >= MAX_IMAGES ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
+                  <div className="border-2 border-dashed border-border rounded-xl p-6 text-center bg-muted/30 hover:bg-muted/50 transition-colors">
                     <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground hover:text-primary transition-colors" />
                     <Input
                       id="images"
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
                       multiple
+                      disabled={images.length >= MAX_IMAGES}
                       onChange={handleImageChange}
                       className="hidden"
                     />
@@ -385,13 +409,33 @@ const PlaceOrder = () => {
                       <span className="text-primary font-medium">Tap to add photos</span>
                       <span className="text-muted-foreground"> or drag and drop</span>
                     </div>
-                    {images.length > 0 && (
-                      <p className="text-sm text-primary mt-2 font-medium">
-                        ✓ {images.length} photo(s) added
-                      </p>
-                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      JPG, JPEG, PNG, WEBP • {images.length}/{MAX_IMAGES} selected
+                    </p>
                   </div>
                 </Label>
+
+                {images.length > 0 && (
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-3">
+                    {images.map((img, idx) => (
+                      <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-border">
+                        <img
+                          src={URL.createObjectURL(img)}
+                          alt={`preview-${idx}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(idx)}
+                          className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 shadow opacity-90 hover:opacity-100"
+                          aria-label="Remove image"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
