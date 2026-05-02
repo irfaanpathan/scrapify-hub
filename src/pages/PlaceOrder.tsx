@@ -43,10 +43,33 @@ const PlaceOrder = () => {
     }
   }, [items.length, user, navigate]);
 
+  const MAX_IMAGES = 5;
+  const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImages(Array.from(e.target.files));
+    if (!e.target.files) return;
+    const selected = Array.from(e.target.files);
+
+    const invalid = selected.filter((f) => !ALLOWED_TYPES.includes(f.type));
+    if (invalid.length > 0) {
+      toast.error("Only JPG, JPEG, PNG, or WEBP images are allowed");
+      e.target.value = "";
+      return;
     }
+
+    const combined = [...images, ...selected];
+    if (combined.length > MAX_IMAGES) {
+      toast.error(`You can upload a maximum of ${MAX_IMAGES} images`);
+      e.target.value = "";
+      return;
+    }
+
+    setImages(combined);
+    e.target.value = "";
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleWeightChange = (id: string, value: string) => {
