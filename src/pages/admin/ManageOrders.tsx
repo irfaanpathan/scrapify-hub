@@ -541,6 +541,21 @@ const ManageOrders = () => {
           })}
         </div>
       </div>
+
+      <Dialog open={!!previewImage} onOpenChange={(open) => !open && setPreviewImage(null)}>
+        <DialogContent className="max-w-4xl p-2">
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Scrap preview"
+              className="w-full h-auto max-h-[85vh] object-contain rounded"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
