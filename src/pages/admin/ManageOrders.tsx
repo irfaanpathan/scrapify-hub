@@ -546,17 +546,81 @@ const ManageOrders = () => {
         </div>
       </div>
 
-      <Dialog open={!!previewImage} onOpenChange={(open) => !open && setPreviewImage(null)}>
-        <DialogContent className="max-w-4xl p-2">
-          {previewImage && (
-            <img
-              src={previewImage}
-              alt="Scrap preview"
-              className="w-full h-auto max-h-[85vh] object-contain rounded"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
-              }}
-            />
+      <Dialog
+        open={!!galleryImages}
+        onOpenChange={(open) => {
+          if (!open) {
+            setGalleryImages(null);
+            setGalleryIndex(0);
+          }
+        }}
+      >
+        <DialogContent className="max-w-5xl p-4">
+          {galleryImages && galleryImages.length > 0 && (
+            <div className="space-y-3">
+              <div className="relative bg-muted rounded-md flex items-center justify-center">
+                <img
+                  src={galleryImages[galleryIndex]}
+                  alt={`Scrap ${galleryIndex + 1}`}
+                  className="w-full h-auto max-h-[70vh] object-contain rounded"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+                  }}
+                />
+                {galleryImages.length > 1 && (
+                  <>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="secondary"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full shadow"
+                      onClick={() =>
+                        setGalleryIndex((i) => (i - 1 + galleryImages.length) % galleryImages.length)
+                      }
+                      aria-label="Previous image"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="secondary"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full shadow"
+                      onClick={() => setGalleryIndex((i) => (i + 1) % galleryImages.length)}
+                      aria-label="Next image"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
+                    <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                      {galleryIndex + 1} / {galleryImages.length}
+                    </span>
+                  </>
+                )}
+              </div>
+              {galleryImages.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {galleryImages.map((url, idx) => (
+                    <button
+                      key={`thumb-${idx}`}
+                      type="button"
+                      onClick={() => setGalleryIndex(idx)}
+                      className={`shrink-0 h-16 w-16 rounded-md overflow-hidden border-2 transition ${
+                        idx === galleryIndex ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt={`Thumb ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = "/placeholder.svg";
+                        }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </DialogContent>
       </Dialog>
