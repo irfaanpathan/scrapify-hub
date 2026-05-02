@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ChevronDown, ChevronUp, Edit2, Save, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit2, Save, X, ImageIcon, ZoomIn } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import AdminOrderTimeline, { ORDER_STEPS } from "@/components/admin/AdminOrderTimeline";
 
 type StatusFilter = "all" | "pending" | "in_progress" | "completed";
