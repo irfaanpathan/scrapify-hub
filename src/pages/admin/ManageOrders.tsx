@@ -43,7 +43,7 @@ const ManageOrders = () => {
   const fetchOrders = async () => {
     const { data } = await supabase
       .from("orders")
-      .select("*, customer:profiles!orders_customer_id_fkey(full_name), partner:profiles!orders_partner_id_fkey(full_name)")
+      .select("*, customer:profiles!orders_customer_id_fkey(full_name, phone), partner:profiles!orders_partner_id_fkey(full_name, phone)")
       .order("created_at", { ascending: false });
 
     if (data) {
@@ -272,10 +272,22 @@ const ManageOrders = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-3 gap-4">
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">Customer</p>
                       <p className="font-medium">{order.customer?.full_name || "Unknown"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Phone Number</p>
+                      <p className="font-medium break-all">
+                        {order.customer?.phone ? (
+                          <a href={`tel:${order.customer.phone}`} className="hover:text-primary">
+                            {order.customer.phone}
+                          </a>
+                        ) : (
+                          "Not Available"
+                        )}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Partner</p>
