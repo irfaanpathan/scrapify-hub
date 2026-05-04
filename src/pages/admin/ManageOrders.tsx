@@ -626,10 +626,42 @@ const ManageOrders = () => {
                                       </Button>
                                     </div>
                                   )}
+                                  <p className="text-xs text-muted-foreground mt-2">
+                                    Subtotal:{" "}
+                                    <span className="font-semibold text-foreground">
+                                      ₹{computeItemSubtotal(item).toFixed(2)}
+                                    </span>
+                                  </p>
                                 </div>
                               </div>
                             </div>
                           ))}
+
+                          {/* Live Totals Summary */}
+                          <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Live Bill Summary
+                            </p>
+                            {items.map((item) => (
+                              <div key={`sum-${item.id}`} className="flex justify-between text-sm">
+                                <span className="text-muted-foreground truncate mr-2">
+                                  {item.sub_category}
+                                  {(item.actual_weight ?? item.estimated_weight)
+                                    ? ` (${item.actual_weight ?? item.estimated_weight}kg)`
+                                    : ""}
+                                </span>
+                                <span className="font-medium shrink-0">
+                                  ₹{computeItemSubtotal(item).toFixed(2)}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="border-t border-border pt-2 mt-2 flex justify-between items-center">
+                              <span className="font-semibold">Total Amount</span>
+                              <span className="text-xl font-bold text-primary">
+                                ₹{computeOrderTotal(order.id).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
