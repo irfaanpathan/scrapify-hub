@@ -768,6 +768,70 @@ const ManageOrders = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Payment Method Dialog */}
+      <Dialog
+        open={!!paymentDialog}
+        onOpenChange={(open) => {
+          if (!open && !savingPayment) setPaymentDialog(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Record Payment</DialogTitle>
+            <DialogDescription>
+              Select the payment method received from the customer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="bg-muted/50 rounded-lg p-3 flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Total Amount</span>
+              <span className="text-2xl font-bold text-primary">
+                ₹{(paymentDialog?.amount ?? 0).toFixed(2)}
+              </span>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Payment Method *</Label>
+              <RadioGroup
+                value={paymentMethod}
+                onValueChange={(v) => setPaymentMethod(v as "upi" | "cash")}
+                className="grid grid-cols-2 gap-3"
+              >
+                <Label
+                  htmlFor="pm-cash"
+                  className={`flex items-center justify-center gap-2 border rounded-lg p-3 cursor-pointer transition ${
+                    paymentMethod === "cash" ? "border-primary bg-primary/5" : "border-border"
+                  }`}
+                >
+                  <RadioGroupItem value="cash" id="pm-cash" />
+                  <span className="font-medium">CASH</span>
+                </Label>
+                <Label
+                  htmlFor="pm-upi"
+                  className={`flex items-center justify-center gap-2 border rounded-lg p-3 cursor-pointer transition ${
+                    paymentMethod === "upi" ? "border-primary bg-primary/5" : "border-border"
+                  }`}
+                >
+                  <RadioGroupItem value="upi" id="pm-upi" />
+                  <span className="font-medium">UPI</span>
+                </Label>
+              </RadioGroup>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setPaymentDialog(null)}
+              disabled={savingPayment}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmPayment} disabled={savingPayment}>
+              {savingPayment ? "Saving..." : "Confirm Payment"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
