@@ -114,7 +114,39 @@ const ManageOrders = () => {
     }
   };
 
+  const computeOrderTotal = (orderId: string) => {
+    const items = orderItems[orderId] || [];
+    return items.reduce((sum, item) => {
+      if (item.final_price != null && !isNaN(Number(item.final_price))) {
+        return sum + Number(item.final_price);
+      }
+      const weight = item.actual_weight ?? item.estimated_weight;
+      if (weight != null && item.price_per_kg != null) {
+        return sum + Number(weight) * Number(item.price_per_kg);
+      }
+      return sum;
+    }, 0);
+  };
+
+  const computeItemSubtotal = (item: any) => {
+    if (item.final_price != null && !isNaN(Number(item.final_price))) {
+      return Number(item.final_price);
+    }
+    const weight = item.actual_weight ?? item.estimated_weight;
+    if (weight != null && item.price_per_kg != null) {
+      return Number(weight) * Number(item.price_per_kg);
+    }
+    return 0;
+  };
+
   const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
+    // Intercept transition to "paid" — require payment method
+    if (newStatus === "paid") {
+      setPaymentMethod("cash");
+      setPaymentDialog({ orderId, amount: computeOrderTotal(orderId) });
+      return;
+    }
+
     setUpdatingStatus(orderId);
     const { error } = await supabase
       .from("orders")
@@ -127,6 +159,70 @@ const ManageOrders = () => {
     } else {
       const stepLabel = ORDER_STEPS.find((s) => s.key === newStatus)?.label || newStatus;
       toast.success(`Status updated to ${stepLabel}`);
+      fetchOrders();
+    }
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!paymentDialog) return;
+    const { orderId, amount } = paymentDialog;
+    setSavingPayment(true);
+
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) {
+      setSavingPayment(false);
+      return;
+    }
+
+    // Check if a payment record already exists for this order
+    const { data: existing } = await supabase
+      .from("payments")
+      .select("id")
+      .eq("order_id", orderId)
+      .maybeSingle();
+
+    let paymentError = null;
+    if (existing) {
+      const { error } = await supabase
+        .from("payments")
+        .update({
+          amount,
+          payment_method: paymentMethod,
+          payment_status: "completed",
+          payment_date: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+      paymentError = error;
+    } else {
+      const { error } = await supabase.from("payments").insert({
+        order_id: orderId,
+        customer_id: order.customer_id,
+        amount,
+        payment_method: paymentMethod,
+        payment_status: "completed",
+        payment_date: new Date().toISOString(),
+      });
+      paymentError = error;
+    }
+
+    if (paymentError) {
+      setSavingPayment(false);
+      toast.error("Failed to save payment");
+      return;
+    }
+
+    const { error: statusError } = await supabase
+      .from("orders")
+      .update({ status: "paid" as any, final_price: amount })
+      .eq("id", orderId);
+
+    setSavingPayment(false);
+
+    if (statusError) {
+      toast.error("Payment saved but status update failed");
+    } else {
+      toast.success(`Payment recorded (${paymentMethod.toUpperCase()})`);
+      setPaymentDialog(null);
       fetchOrders();
     }
   };
