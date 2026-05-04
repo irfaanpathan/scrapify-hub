@@ -485,12 +485,17 @@ const ManageOrders = () => {
 
                   {/* Order Final Price Override */}
                   <div className="bg-muted/50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
                         <p className="text-sm text-muted-foreground">Order Final Price</p>
                         <p className="font-semibold text-lg text-primary">
                           {order.final_price ? `₹${order.final_price}` : "Not set"}
                         </p>
+                        {orderPayments[order.id]?.payment_method && (
+                          <Badge variant="outline" className="mt-1 text-xs">
+                            Paid via {String(orderPayments[order.id].payment_method).toUpperCase()}
+                          </Badge>
+                        )}
                       </div>
                       {editingOrderPrice === order.id ? (
                         <div className="flex items-center gap-2">
