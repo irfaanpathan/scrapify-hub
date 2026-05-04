@@ -12,7 +12,8 @@ import { toast } from "sonner";
 import { ChevronDown, ChevronUp, Edit2, Save, X, ImageIcon, ZoomIn, ChevronLeft, ChevronRight } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import AdminOrderTimeline, { ORDER_STEPS } from "@/components/admin/AdminOrderTimeline";
 
 type StatusFilter = "all" | "pending" | "in_progress" | "completed";
@@ -23,6 +24,7 @@ const ManageOrders = () => {
   const [partners, setPartners] = useState<any[]>([]);
   const [orderItems, setOrderItems] = useState<Record<string, any[]>>({});
   const [orderImages, setOrderImages] = useState<Record<string, string[]>>({});
+  const [orderPayments, setOrderPayments] = useState<Record<string, any>>({});
   const [galleryImages, setGalleryImages] = useState<string[] | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
@@ -32,6 +34,9 @@ const ManageOrders = () => {
   const [newOrderFinalPrice, setNewOrderFinalPrice] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [paymentDialog, setPaymentDialog] = useState<{ orderId: string; amount: number } | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"upi" | "cash">("cash");
+  const [savingPayment, setSavingPayment] = useState(false);
 
   useEffect(() => {
     if (isAdmin) {
@@ -52,7 +57,19 @@ const ManageOrders = () => {
       data.forEach((order) => {
         fetchOrderItems(order.id);
         fetchOrderImages(order.id);
+        fetchOrderPayment(order.id);
       });
+    }
+  };
+
+  const fetchOrderPayment = async (orderId: string) => {
+    const { data } = await supabase
+      .from("payments")
+      .select("*")
+      .eq("order_id", orderId)
+      .maybeSingle();
+    if (data) {
+      setOrderPayments((prev) => ({ ...prev, [orderId]: data }));
     }
   };
 
@@ -110,7 +127,39 @@ const ManageOrders = () => {
     }
   };
 
+  const computeOrderTotal = (orderId: string) => {
+    const items = orderItems[orderId] || [];
+    return items.reduce((sum, item) => {
+      if (item.final_price != null && !isNaN(Number(item.final_price))) {
+        return sum + Number(item.final_price);
+      }
+      const weight = item.actual_weight ?? item.estimated_weight;
+      if (weight != null && item.price_per_kg != null) {
+        return sum + Number(weight) * Number(item.price_per_kg);
+      }
+      return sum;
+    }, 0);
+  };
+
+  const computeItemSubtotal = (item: any) => {
+    if (item.final_price != null && !isNaN(Number(item.final_price))) {
+      return Number(item.final_price);
+    }
+    const weight = item.actual_weight ?? item.estimated_weight;
+    if (weight != null && item.price_per_kg != null) {
+      return Number(weight) * Number(item.price_per_kg);
+    }
+    return 0;
+  };
+
   const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
+    // Intercept transition to "paid" — require payment method
+    if (newStatus === "paid") {
+      setPaymentMethod("cash");
+      setPaymentDialog({ orderId, amount: computeOrderTotal(orderId) });
+      return;
+    }
+
     setUpdatingStatus(orderId);
     const { error } = await supabase
       .from("orders")
@@ -123,6 +172,70 @@ const ManageOrders = () => {
     } else {
       const stepLabel = ORDER_STEPS.find((s) => s.key === newStatus)?.label || newStatus;
       toast.success(`Status updated to ${stepLabel}`);
+      fetchOrders();
+    }
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!paymentDialog) return;
+    const { orderId, amount } = paymentDialog;
+    setSavingPayment(true);
+
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) {
+      setSavingPayment(false);
+      return;
+    }
+
+    // Check if a payment record already exists for this order
+    const { data: existing } = await supabase
+      .from("payments")
+      .select("id")
+      .eq("order_id", orderId)
+      .maybeSingle();
+
+    let paymentError = null;
+    if (existing) {
+      const { error } = await supabase
+        .from("payments")
+        .update({
+          amount,
+          payment_method: paymentMethod,
+          payment_status: "completed",
+          payment_date: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+      paymentError = error;
+    } else {
+      const { error } = await supabase.from("payments").insert({
+        order_id: orderId,
+        customer_id: order.customer_id,
+        amount,
+        payment_method: paymentMethod,
+        payment_status: "completed",
+        payment_date: new Date().toISOString(),
+      });
+      paymentError = error;
+    }
+
+    if (paymentError) {
+      setSavingPayment(false);
+      toast.error("Failed to save payment");
+      return;
+    }
+
+    const { error: statusError } = await supabase
+      .from("orders")
+      .update({ status: "paid" as any, final_price: amount })
+      .eq("id", orderId);
+
+    setSavingPayment(false);
+
+    if (statusError) {
+      toast.error("Payment saved but status update failed");
+    } else {
+      toast.success(`Payment recorded (${paymentMethod.toUpperCase()})`);
+      setPaymentDialog(null);
       fetchOrders();
     }
   };
@@ -372,12 +485,17 @@ const ManageOrders = () => {
 
                   {/* Order Final Price Override */}
                   <div className="bg-muted/50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
                         <p className="text-sm text-muted-foreground">Order Final Price</p>
                         <p className="font-semibold text-lg text-primary">
                           {order.final_price ? `₹${order.final_price}` : "Not set"}
                         </p>
+                        {orderPayments[order.id]?.payment_method && (
+                          <Badge variant="outline" className="mt-1 text-xs">
+                            Paid via {String(orderPayments[order.id].payment_method).toUpperCase()}
+                          </Badge>
+                        )}
                       </div>
                       {editingOrderPrice === order.id ? (
                         <div className="flex items-center gap-2">
@@ -526,10 +644,42 @@ const ManageOrders = () => {
                                       </Button>
                                     </div>
                                   )}
+                                  <p className="text-xs text-muted-foreground mt-2">
+                                    Subtotal:{" "}
+                                    <span className="font-semibold text-foreground">
+                                      ₹{computeItemSubtotal(item).toFixed(2)}
+                                    </span>
+                                  </p>
                                 </div>
                               </div>
                             </div>
                           ))}
+
+                          {/* Live Totals Summary */}
+                          <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              Live Bill Summary
+                            </p>
+                            {items.map((item) => (
+                              <div key={`sum-${item.id}`} className="flex justify-between text-sm">
+                                <span className="text-muted-foreground truncate mr-2">
+                                  {item.sub_category}
+                                  {(item.actual_weight ?? item.estimated_weight)
+                                    ? ` (${item.actual_weight ?? item.estimated_weight}kg)`
+                                    : ""}
+                                </span>
+                                <span className="font-medium shrink-0">
+                                  ₹{computeItemSubtotal(item).toFixed(2)}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="border-t border-border pt-2 mt-2 flex justify-between items-center">
+                              <span className="font-semibold">Total Amount</span>
+                              <span className="text-xl font-bold text-primary">
+                                ₹{computeOrderTotal(order.id).toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
@@ -634,6 +784,70 @@ const ManageOrders = () => {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Method Dialog */}
+      <Dialog
+        open={!!paymentDialog}
+        onOpenChange={(open) => {
+          if (!open && !savingPayment) setPaymentDialog(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Record Payment</DialogTitle>
+            <DialogDescription>
+              Select the payment method received from the customer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="bg-muted/50 rounded-lg p-3 flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Total Amount</span>
+              <span className="text-2xl font-bold text-primary">
+                ₹{(paymentDialog?.amount ?? 0).toFixed(2)}
+              </span>
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Payment Method *</Label>
+              <RadioGroup
+                value={paymentMethod}
+                onValueChange={(v) => setPaymentMethod(v as "upi" | "cash")}
+                className="grid grid-cols-2 gap-3"
+              >
+                <Label
+                  htmlFor="pm-cash"
+                  className={`flex items-center justify-center gap-2 border rounded-lg p-3 cursor-pointer transition ${
+                    paymentMethod === "cash" ? "border-primary bg-primary/5" : "border-border"
+                  }`}
+                >
+                  <RadioGroupItem value="cash" id="pm-cash" />
+                  <span className="font-medium">CASH</span>
+                </Label>
+                <Label
+                  htmlFor="pm-upi"
+                  className={`flex items-center justify-center gap-2 border rounded-lg p-3 cursor-pointer transition ${
+                    paymentMethod === "upi" ? "border-primary bg-primary/5" : "border-border"
+                  }`}
+                >
+                  <RadioGroupItem value="upi" id="pm-upi" />
+                  <span className="font-medium">UPI</span>
+                </Label>
+              </RadioGroup>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setPaymentDialog(null)}
+              disabled={savingPayment}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmPayment} disabled={savingPayment}>
+              {savingPayment ? "Saving..." : "Confirm Payment"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
