@@ -96,6 +96,36 @@ const OrderConfirmation = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Full-screen Success Animation */}
+      {showSuccessOverlay && order && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-sm animate-fade-in"
+          onClick={() => setShowSuccessOverlay(false)}
+          role="dialog"
+          aria-label="Order placed successfully"
+        >
+          <div className="text-center px-6 animate-scale-in">
+            <div className="relative inline-flex items-center justify-center mb-6">
+              <span className="absolute inline-flex h-32 w-32 rounded-full bg-success/20 animate-ping" />
+              <span className="absolute inline-flex h-24 w-24 rounded-full bg-success/30" />
+              <div className="relative inline-flex items-center justify-center h-28 w-28 rounded-full bg-success shadow-2xl">
+                <CheckCircle className="h-16 w-16 text-success-foreground" strokeWidth={2.5} />
+              </div>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+              Order Placed Successfully
+            </h2>
+            <p className="text-base text-muted-foreground mb-2">
+              Your scrap pickup request has been submitted successfully.
+            </p>
+            <p className="text-sm font-mono text-primary">
+              Order ID: #{order.id.slice(0, 8).toUpperCase()}
+            </p>
+            <p className="text-xs text-muted-foreground mt-6">Tap anywhere to continue</p>
+          </div>
+        </div>
+      )}
+
       <Navbar />
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Success Header */}
