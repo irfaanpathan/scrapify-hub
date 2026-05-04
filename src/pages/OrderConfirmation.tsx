@@ -30,6 +30,13 @@ const OrderConfirmation = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSuccessOverlay, setShowSuccessOverlay] = useState(true);
+
+  useEffect(() => {
+    // Auto-dismiss the full-screen success animation
+    const timer = setTimeout(() => setShowSuccessOverlay(false), 2800);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
