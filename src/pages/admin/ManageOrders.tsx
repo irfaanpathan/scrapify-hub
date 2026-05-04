@@ -24,6 +24,7 @@ const ManageOrders = () => {
   const [partners, setPartners] = useState<any[]>([]);
   const [orderItems, setOrderItems] = useState<Record<string, any[]>>({});
   const [orderImages, setOrderImages] = useState<Record<string, string[]>>({});
+  const [orderPayments, setOrderPayments] = useState<Record<string, any>>({});
   const [galleryImages, setGalleryImages] = useState<string[] | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
