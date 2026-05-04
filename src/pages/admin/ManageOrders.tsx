@@ -57,7 +57,19 @@ const ManageOrders = () => {
       data.forEach((order) => {
         fetchOrderItems(order.id);
         fetchOrderImages(order.id);
+        fetchOrderPayment(order.id);
       });
+    }
+  };
+
+  const fetchOrderPayment = async (orderId: string) => {
+    const { data } = await supabase
+      .from("payments")
+      .select("*")
+      .eq("order_id", orderId)
+      .maybeSingle();
+    if (data) {
+      setOrderPayments((prev) => ({ ...prev, [orderId]: data }));
     }
   };
 
