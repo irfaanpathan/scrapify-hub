@@ -33,6 +33,9 @@ const ManageOrders = () => {
   const [newOrderFinalPrice, setNewOrderFinalPrice] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [paymentDialog, setPaymentDialog] = useState<{ orderId: string; amount: number } | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"upi" | "cash">("cash");
+  const [savingPayment, setSavingPayment] = useState(false);
 
   useEffect(() => {
     if (isAdmin) {
