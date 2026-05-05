@@ -298,7 +298,7 @@ const ManageOrders = () => {
 
     const { error } = await supabase
       .from("orders")
-      .update({ final_price: price })
+      .update({ final_price: price, total_amount: price })
       .eq("id", orderId);
 
     if (error) {
