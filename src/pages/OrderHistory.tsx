@@ -138,9 +138,15 @@ const OrderHistory = () => {
   };
 
   const handleReorder = async (orderId: string) => {
+    const previousOrder = orders.find((o) => o.id === orderId);
     const items = orderItems[orderId];
-    if (!items || items.length === 0) {
+    if (!previousOrder || !items || items.length === 0) {
       toast.error("No items found to reorder");
+      return;
+    }
+
+    if (!user) {
+      toast.error("Please sign in to reorder");
       return;
     }
 
@@ -150,27 +156,64 @@ const OrderHistory = () => {
       .select("*")
       .in("name", subCategoryNames);
 
-    if (!subCategories) {
+    if (!subCategories || subCategories.length === 0) {
       toast.error("Could not fetch current prices");
       return;
     }
 
-    items.forEach((item) => {
-      const subCat = subCategories.find((s) => s.name === item.sub_category);
-      if (subCat) {
-        addItem({
-          category: subCat.category,
-          subCategory: subCat.id,
-          subCategoryName: subCat.name,
-          pricePerKg: subCat.price_per_kg,
-          estimatedWeight: item.estimated_weight || 1,
-          notes: "",
-        });
-      }
-    });
+    const reorderToast = toast.loading("Placing your reorder...");
 
-    toast.success("Items added to cart!");
-    navigate("/order");
+    try {
+      const primaryCategory = (subCategories[0]?.category ||
+        previousOrder.category) as "paper" | "plastic" | "metal" | "ewaste";
+
+      // Reuse previous address; pickup time = same time tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const { data: newOrder, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          customer_id: user.id,
+          category: primaryCategory,
+          pickup_address: previousOrder.pickup_address,
+          pickup_time: tomorrow.toISOString(),
+          status: "pending" as const,
+        })
+        .select()
+        .single();
+
+      if (orderError || !newOrder) throw orderError;
+
+      const newItems = items
+        .map((item) => {
+          const subCat = subCategories.find((s) => s.name === item.sub_category);
+          if (!subCat) return null;
+          return {
+            order_id: newOrder.id,
+            category: subCat.category,
+            sub_category: subCat.name,
+            estimated_weight: item.estimated_weight || 1,
+            price_per_kg: subCat.price_per_kg,
+            notes: null,
+          };
+        })
+        .filter(Boolean) as any[];
+
+      if (newItems.length > 0) {
+        const { error: itemsError } = await supabase
+          .from("order_items")
+          .insert(newItems);
+        if (itemsError) throw itemsError;
+      }
+
+      toast.dismiss(reorderToast);
+      toast.success("Reorder placed using your previous address!");
+      navigate(`/order-confirmation?orderId=${newOrder.id}`);
+    } catch (err: any) {
+      toast.dismiss(reorderToast);
+      toast.error(err.message || "Failed to place reorder");
+    }
   };
 
   return (
