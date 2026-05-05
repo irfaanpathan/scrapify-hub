@@ -240,6 +240,31 @@ const ManageOrders = () => {
     }
   };
 
+  const syncOrderTotals = async (orderId: string) => {
+    // Re-fetch latest items, then push the recomputed total into orders.final_price + total_amount
+    const { data: latestItems } = await supabase
+      .from("order_items")
+      .select("*")
+      .eq("order_id", orderId);
+
+    const items = latestItems || [];
+    const total = items.reduce((sum, item: any) => {
+      if (item.final_price != null && !isNaN(Number(item.final_price))) {
+        return sum + Number(item.final_price);
+      }
+      const weight = item.actual_weight ?? item.estimated_weight;
+      if (weight != null && item.price_per_kg != null) {
+        return sum + Number(weight) * Number(item.price_per_kg);
+      }
+      return sum;
+    }, 0);
+
+    await supabase
+      .from("orders")
+      .update({ final_price: total, total_amount: total })
+      .eq("id", orderId);
+  };
+
   const handleUpdateItemFinalPrice = async (orderId: string, itemId: string) => {
     const price = parseFloat(newFinalPrice);
     if (isNaN(price) || price < 0) {
@@ -255,8 +280,10 @@ const ManageOrders = () => {
     if (error) {
       toast.error("Failed to update price");
     } else {
+      await syncOrderTotals(orderId);
       toast.success("Item price updated");
       fetchOrderItems(orderId);
+      fetchOrders();
       setEditingPrice(null);
       setNewFinalPrice("");
     }
