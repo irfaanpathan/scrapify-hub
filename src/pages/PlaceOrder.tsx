@@ -370,7 +370,11 @@ const PlaceOrder = () => {
                       mode="single"
                       selected={pickupDate}
                       onSelect={setPickupDate}
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date < today;
+                      }}
                       initialFocus
                       className="pointer-events-auto"
                     />

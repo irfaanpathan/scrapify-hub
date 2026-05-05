@@ -226,7 +226,7 @@ const ManageOrders = () => {
 
     const { error: statusError } = await supabase
       .from("orders")
-      .update({ status: "paid" as any, final_price: amount })
+      .update({ status: "paid" as any, final_price: amount, total_amount: amount })
       .eq("id", orderId);
 
     setSavingPayment(false);
@@ -238,6 +238,31 @@ const ManageOrders = () => {
       setPaymentDialog(null);
       fetchOrders();
     }
+  };
+
+  const syncOrderTotals = async (orderId: string) => {
+    // Re-fetch latest items, then push the recomputed total into orders.final_price + total_amount
+    const { data: latestItems } = await supabase
+      .from("order_items")
+      .select("*")
+      .eq("order_id", orderId);
+
+    const items = latestItems || [];
+    const total = items.reduce((sum, item: any) => {
+      if (item.final_price != null && !isNaN(Number(item.final_price))) {
+        return sum + Number(item.final_price);
+      }
+      const weight = item.actual_weight ?? item.estimated_weight;
+      if (weight != null && item.price_per_kg != null) {
+        return sum + Number(weight) * Number(item.price_per_kg);
+      }
+      return sum;
+    }, 0);
+
+    await supabase
+      .from("orders")
+      .update({ final_price: total, total_amount: total })
+      .eq("id", orderId);
   };
 
   const handleUpdateItemFinalPrice = async (orderId: string, itemId: string) => {
@@ -255,8 +280,10 @@ const ManageOrders = () => {
     if (error) {
       toast.error("Failed to update price");
     } else {
+      await syncOrderTotals(orderId);
       toast.success("Item price updated");
       fetchOrderItems(orderId);
+      fetchOrders();
       setEditingPrice(null);
       setNewFinalPrice("");
     }
@@ -271,7 +298,7 @@ const ManageOrders = () => {
 
     const { error } = await supabase
       .from("orders")
-      .update({ final_price: price })
+      .update({ final_price: price, total_amount: price })
       .eq("id", orderId);
 
     if (error) {
