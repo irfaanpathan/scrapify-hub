@@ -226,7 +226,7 @@ const ManageOrders = () => {
 
     const { error: statusError } = await supabase
       .from("orders")
-      .update({ status: "paid" as any, final_price: amount })
+      .update({ status: "paid" as any, final_price: amount, total_amount: amount })
       .eq("id", orderId);
 
     setSavingPayment(false);
