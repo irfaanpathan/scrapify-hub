@@ -25,7 +25,16 @@ import DataPortal from "./pages/admin/DataPortal";
 import CustomerImages from "./pages/admin/CustomerImages";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2,
+      gcTime: 1000 * 60 * 10,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -39,6 +48,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/order" element={<PlaceOrder />} />
             <Route path="/track" element={<TrackOrder />} />
+            <Route path="/orders" element={<TrackOrder />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/history" element={<OrderHistory />} />
             <Route path="/profile" element={<Profile />} />
