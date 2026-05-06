@@ -221,10 +221,10 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
           </button>
 
           <Link
-            to={user ? "/order" : "/auth"}
+            to={user ? "/profile" : "/auth"}
             className={cn(
               "flex flex-col items-center gap-1 px-4 py-2",
-              isActive("/auth") || isActive("/order") ? "text-primary" : "text-muted-foreground"
+              isActive("/profile") || isActive("/auth") ? "text-primary" : "text-muted-foreground"
             )}
           >
             <User className="h-5 w-5" />
