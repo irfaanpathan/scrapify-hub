@@ -48,6 +48,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/order" element={<PlaceOrder />} />
             <Route path="/track" element={<TrackOrder />} />
+            <Route path="/orders" element={<TrackOrder />} />
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/history" element={<OrderHistory />} />
             <Route path="/profile" element={<Profile />} />
