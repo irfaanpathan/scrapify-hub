@@ -385,7 +385,7 @@ const OrderHistory = () => {
                           rel="noopener noreferrer"
                           className="block aspect-square rounded-md overflow-hidden border hover:opacity-80 transition"
                         >
-                          <img
+                          <img loading="lazy" decoding="async"
                             src={img.image_url}
                             alt="Order upload"
                             className="w-full h-full object-cover"

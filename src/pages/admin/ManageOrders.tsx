@@ -748,7 +748,7 @@ const ManageOrders = () => {
           {galleryImages && galleryImages.length > 0 && (
             <div className="space-y-3">
               <div className="relative bg-muted rounded-md flex items-center justify-center">
-                <img
+                <img loading="lazy" decoding="async"
                   src={galleryImages[galleryIndex]}
                   alt={`Scrap ${galleryIndex + 1}`}
                   className="w-full h-auto max-h-[70vh] object-contain rounded"
@@ -797,7 +797,7 @@ const ManageOrders = () => {
                         idx === galleryIndex ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
                       }`}
                     >
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={url}
                         alt={`Thumb ${idx + 1}`}
                         className="w-full h-full object-cover"
