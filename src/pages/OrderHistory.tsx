@@ -299,15 +299,6 @@ const OrderHistory = () => {
                         <FileText className="h-3 w-3" />
                         View Bill
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleReorder(order.id)}
-                        className="gap-1"
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                        {t("reorder")}
-                      </Button>
                     </div>
                   </div>
                 </CardContent>
