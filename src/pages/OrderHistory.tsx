@@ -40,7 +40,7 @@ const CATEGORY_NAMES: Record<string, Record<string, string>> = {
 const OrderHistory = () => {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
-  const { items, addItem } = useCart();
+  const { items } = useCart();
   const [orders, setOrders] = useState<any[]>([]);
   const [orderItems, setOrderItems] = useState<Record<string, any[]>>({});
   const [user, setUser] = useState<any>(null);
