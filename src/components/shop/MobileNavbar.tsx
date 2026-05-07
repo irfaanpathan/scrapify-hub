@@ -150,6 +150,16 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
                         <History className="h-5 w-5" />
                         {t("orderHistory")}
                       </Link>
+                      <button
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          setIsHelpOpen(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-left"
+                      >
+                        <LifeBuoy className="h-5 w-5" />
+                        Help & Support
+                      </button>
                       <Button
                         variant="ghost"
                         className="w-full justify-start gap-3 px-3"
