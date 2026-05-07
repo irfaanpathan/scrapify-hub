@@ -164,6 +164,47 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
         </div>
       </div>
     </nav>
+
+      <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LifeBuoy className="h-5 w-5 text-primary" />
+              Help & Support
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <a href="tel:8356987877" className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Phone className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Call us</p>
+                <p className="font-semibold text-foreground">8356987877</p>
+              </div>
+            </a>
+            <a href="https://wa.me/918356987877?text=Hi%20Scrapy5%2C%20I%20need%20help" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
+              <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
+                <MessageCircle className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">WhatsApp</p>
+                <p className="font-semibold text-foreground">8356987877</p>
+              </div>
+            </a>
+            <a href="mailto:scrapify05@gmail.com" className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors">
+              <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
+                <Mail className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="font-semibold text-foreground break-all">scrapify05@gmail.com</p>
+              </div>
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
