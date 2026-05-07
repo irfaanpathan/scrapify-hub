@@ -26,6 +26,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
   const { t } = useLanguage();
   const { addItem } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
