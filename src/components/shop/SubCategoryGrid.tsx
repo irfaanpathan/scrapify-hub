@@ -237,9 +237,9 @@ const SubCategoryGrid = ({ subCategories, categoryName, customImages = {} }: Sub
         })}
       </div>
       
-      <div className="mt-4 md:mt-6 p-3 md:p-4 bg-warning/10 border border-warning/20 rounded-lg">
-        <p className="text-xs md:text-sm text-warning-foreground">
-          ⚠️ <strong>Note:</strong> Price may vary during doorstep inspection by partner.
+      <div className="mt-4 md:mt-6 p-3 md:p-4 bg-warning/20 border-2 border-warning/50 rounded-lg shadow-sm">
+        <p className="text-sm md:text-base font-semibold text-foreground">
+          ⚠️ <strong className="font-bold">Note:</strong> Price may vary during doorstep inspection by partner.
         </p>
       </div>
     </div>

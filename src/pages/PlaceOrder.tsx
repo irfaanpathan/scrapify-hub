@@ -480,8 +480,8 @@ const PlaceOrder = () => {
                 </div>
               </div>
               
-              <div className="bg-primary/5 border border-primary/10 rounded-xl p-3 mt-3">
-                <p className="text-xs text-muted-foreground">
+              <div className="bg-primary/10 border-2 border-primary/30 rounded-xl p-3 mt-3">
+                <p className="text-sm font-semibold text-foreground">
                   💡 The final amount may vary slightly based on actual weight measured during pickup. No worries—our partner will confirm everything with you!
                 </p>
               </div>

@@ -21,6 +21,7 @@ const ManageImages = () => {
     plastic: null,
     metal: null,
     ewaste: null,
+    others: null,
   });
 
   useEffect(() => {
