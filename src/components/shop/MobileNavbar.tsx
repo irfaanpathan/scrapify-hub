@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Home, ShoppingCart, User, Package, Menu, LogOut, History } from "lucide-react";
+import { Home, ShoppingCart, User, Package, Menu, LogOut, History, LifeBuoy, Phone, Mail, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
   const { t } = useLanguage();
   const { addItem } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -148,6 +150,16 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
                         <History className="h-5 w-5" />
                         {t("orderHistory")}
                       </Link>
+                      <button
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          setIsHelpOpen(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted transition-colors text-left"
+                      >
+                        <LifeBuoy className="h-5 w-5" />
+                        Help & Support
+                      </button>
                       <Button
                         variant="ghost"
                         className="w-full justify-start gap-3 px-3"
@@ -232,6 +244,58 @@ const MobileNavbar = ({ user, cartItemCount, onCartClick, onSearch }: MobileNavb
           </Link>
         </div>
       </nav>
+
+      {/* Help & Support Dialog */}
+      <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LifeBuoy className="h-5 w-5 text-primary" />
+              Help & Support
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <a
+              href="tel:8356987877"
+              className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors"
+            >
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Phone className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Call us</p>
+                <p className="font-semibold text-foreground">8356987877</p>
+              </div>
+            </a>
+            <a
+              href="https://wa.me/918356987877?text=Hi%20Scrapy5%2C%20I%20need%20help"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors"
+            >
+              <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
+                <MessageCircle className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">WhatsApp</p>
+                <p className="font-semibold text-foreground">8356987877</p>
+              </div>
+            </a>
+            <a
+              href="mailto:scrapify05@gmail.com"
+              className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted transition-colors"
+            >
+              <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
+                <Mail className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="font-semibold text-foreground break-all">scrapify05@gmail.com</p>
+              </div>
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
