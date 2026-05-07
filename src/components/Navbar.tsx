@@ -130,6 +130,16 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
                         {link.label}
                       </Link>
                     ))}
+                    <button
+                      onClick={() => {
+                        setIsOpen(false);
+                        setIsHelpOpen(true);
+                      }}
+                      className="w-full flex items-center px-3 py-2 rounded-lg hover:bg-muted transition-colors text-left"
+                    >
+                      <LifeBuoy className="h-4 w-4 mr-2" />
+                      Help & Support
+                    </button>
                     <Button
                       variant="ghost"
                       className="w-full justify-start px-3"
