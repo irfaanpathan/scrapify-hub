@@ -17,6 +17,7 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
