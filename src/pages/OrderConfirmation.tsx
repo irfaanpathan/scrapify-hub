@@ -99,30 +99,88 @@ const OrderConfirmation = () => {
       {/* Full-screen Success Animation */}
       {showSuccessOverlay && order && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-sm animate-fade-in"
-          onClick={() => setShowSuccessOverlay(false)}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-primary/95 via-primary to-success/90 animate-fade-in overflow-hidden"
           role="dialog"
           aria-label="Order placed successfully"
         >
-          <div className="text-center px-6 animate-scale-in">
-            <div className="relative inline-flex items-center justify-center mb-6">
-              <span className="absolute inline-flex h-32 w-32 rounded-full bg-success/20 animate-ping" />
-              <span className="absolute inline-flex h-24 w-24 rounded-full bg-success/30" />
-              <div className="relative inline-flex items-center justify-center h-28 w-28 rounded-full bg-success shadow-2xl">
-                <CheckCircle className="h-16 w-16 text-success-foreground" strokeWidth={2.5} />
+          {/* Decorative blurred orbs */}
+          <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
+
+          <div className="relative text-center px-6 max-w-md w-full animate-scale-in">
+            {/* Animated checkmark */}
+            <div className="relative inline-flex items-center justify-center mb-8">
+              <span className="absolute inline-flex h-40 w-40 rounded-full bg-white/20 animate-ping" />
+              <span className="absolute inline-flex h-32 w-32 rounded-full bg-white/30" />
+              <div className="relative inline-flex items-center justify-center h-32 w-32 rounded-full bg-white shadow-2xl">
+                <svg
+                  className="h-20 w-20"
+                  viewBox="0 0 52 52"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle
+                    cx="26"
+                    cy="26"
+                    r="24"
+                    stroke="hsl(var(--success))"
+                    strokeWidth="3"
+                    strokeDasharray="160"
+                    strokeDashoffset="160"
+                    style={{
+                      animation: "checkmark-circle 0.6s ease-out forwards",
+                    }}
+                  />
+                  <path
+                    d="M14 27l8 8 16-18"
+                    stroke="hsl(var(--success))"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray="50"
+                    strokeDashoffset="50"
+                    style={{
+                      animation: "checkmark-check 0.4s ease-out 0.6s forwards",
+                    }}
+                  />
+                </svg>
               </div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+
+            <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg">
               Order Successfully Placed
             </h2>
-            <p className="text-base md:text-lg text-foreground/80 mb-2">
-              Thank you! Your scrap pickup request has been submitted successfully.
+            <p className="text-base md:text-lg text-white/90 mb-2 leading-relaxed">
+              Thank you for choosing Scrapy5! 🎉
             </p>
-            <p className="text-sm font-mono text-primary">
-              Order ID: #{order.id.slice(0, 8).toUpperCase()}
+            <p className="text-sm md:text-base text-white/80 mb-6">
+              Your scrap pickup request has been confirmed. We'll reach out shortly.
             </p>
-            <p className="text-xs text-muted-foreground mt-6">Tap anywhere to continue</p>
+            <div className="inline-block px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 mb-8">
+              <p className="text-sm font-mono text-white">
+                Order ID: #{order.id.slice(0, 8).toUpperCase()}
+              </p>
+            </div>
+            <div>
+              <Button
+                size="lg"
+                className="bg-white text-primary hover:bg-white/90 font-semibold px-8 shadow-xl"
+                onClick={() => setShowSuccessOverlay(false)}
+              >
+                Continue
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
           </div>
+
+          <style>{`
+            @keyframes checkmark-circle {
+              to { stroke-dashoffset: 0; }
+            }
+            @keyframes checkmark-check {
+              to { stroke-dashoffset: 0; }
+            }
+          `}</style>
         </div>
       )}
 
