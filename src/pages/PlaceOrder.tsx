@@ -165,7 +165,6 @@ const PlaceOrder = () => {
       }
 
       clearCart();
-      toast.success("Order placed successfully!");
       navigate(`/order-confirmation?orderId=${orderData.id}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to place order");

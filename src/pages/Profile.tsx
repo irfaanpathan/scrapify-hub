@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
-import { User, Phone, Mail, MapPin, Save, Loader2 } from "lucide-react";
+import { User, Phone, Mail, MapPin, Save, Loader2, LifeBuoy, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -176,6 +177,22 @@ const Profile = () => {
             </Button>
           </CardContent>
         </Card>
+
+        <Link
+          to="/help"
+          className="mt-4 flex items-center justify-between p-4 rounded-lg border border-border bg-card hover:bg-accent transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+              <LifeBuoy className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-medium text-foreground">Help & Support</p>
+              <p className="text-xs text-muted-foreground">Contact us, WhatsApp, business support</p>
+            </div>
+          </div>
+          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+        </Link>
       </div>
     </div>
   );

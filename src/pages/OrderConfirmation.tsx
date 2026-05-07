@@ -33,8 +33,8 @@ const OrderConfirmation = () => {
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(true);
 
   useEffect(() => {
-    // Auto-dismiss the full-screen success animation
-    const timer = setTimeout(() => setShowSuccessOverlay(false), 2800);
+    // Auto-dismiss the full-screen success animation after a few seconds
+    const timer = setTimeout(() => setShowSuccessOverlay(false), 4000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -113,10 +113,10 @@ const OrderConfirmation = () => {
               </div>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-              Order Placed Successfully
+              Order Successfully Placed
             </h2>
-            <p className="text-base text-muted-foreground mb-2">
-              Your scrap pickup request has been submitted successfully.
+            <p className="text-base md:text-lg text-foreground/80 mb-2">
+              Thank you! Your scrap pickup request has been submitted successfully.
             </p>
             <p className="text-sm font-mono text-primary">
               Order ID: #{order.id.slice(0, 8).toUpperCase()}
