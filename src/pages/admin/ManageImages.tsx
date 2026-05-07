@@ -21,6 +21,7 @@ const ManageImages = () => {
     plastic: null,
     metal: null,
     ewaste: null,
+    others: null,
   });
 
   useEffect(() => {
@@ -162,6 +163,8 @@ const ManageImages = () => {
         return "Metal";
       case "ewaste":
         return "E-Waste";
+      case "others":
+        return "Others";
       default:
         return category;
     }
@@ -189,8 +192,8 @@ const ManageImages = () => {
       <div className="container mx-auto p-4 md:p-6">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-6">Manage Category Images</h1>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {["paper", "plastic", "metal", "ewaste"].map((category) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {["paper", "plastic", "metal", "ewaste", "others"].map((category) => (
             <Card key={category} className="overflow-hidden">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">{getCategoryName(category)}</CardTitle>

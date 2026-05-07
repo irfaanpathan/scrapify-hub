@@ -11,6 +11,7 @@ import TrackOrder from "./pages/TrackOrder";
 import OrderHistory from "./pages/OrderHistory";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Profile from "./pages/Profile";
+import HelpSupport from "./pages/HelpSupport";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerOrders from "./pages/partner/PartnerOrders";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -52,6 +53,8 @@ const App = () => (
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/history" element={<OrderHistory />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/help" element={<HelpSupport />} />
+            <Route path="/support" element={<HelpSupport />} />
             <Route path="/partner" element={<PartnerDashboard />} />
             <Route path="/partner/orders" element={<PartnerOrders />} />
             <Route path="/admin-login" element={<AdminLogin />} />

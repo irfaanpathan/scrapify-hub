@@ -165,7 +165,6 @@ const PlaceOrder = () => {
       }
 
       clearCart();
-      toast.success("Order placed successfully!");
       navigate(`/order-confirmation?orderId=${orderData.id}`);
     } catch (error: any) {
       toast.error(error.message || "Failed to place order");
@@ -480,8 +479,8 @@ const PlaceOrder = () => {
                 </div>
               </div>
               
-              <div className="bg-primary/5 border border-primary/10 rounded-xl p-3 mt-3">
-                <p className="text-xs text-muted-foreground">
+              <div className="bg-primary/10 border-2 border-primary/30 rounded-xl p-3 mt-3">
+                <p className="text-sm font-semibold text-foreground">
                   💡 The final amount may vary slightly based on actual weight measured during pickup. No worries—our partner will confirm everything with you!
                 </p>
               </div>
