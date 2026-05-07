@@ -75,6 +75,7 @@ const Navbar = ({ role = "customer" }: NavbarProps) => {
   const links = getLinks();
 
   return (
+    <>
     <nav className="border-b bg-background sticky top-0 z-50 shadow-soft">
       <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
