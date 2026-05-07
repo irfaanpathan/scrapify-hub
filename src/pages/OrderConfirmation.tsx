@@ -34,7 +34,7 @@ const OrderConfirmation = () => {
 
   useEffect(() => {
     // Auto-dismiss the full-screen success animation after a few seconds
-    const timer = setTimeout(() => setShowSuccessOverlay(false), 4000);
+    const timer = setTimeout(() => setShowSuccessOverlay(false), 5000);
     return () => clearTimeout(timer);
   }, []);
 
