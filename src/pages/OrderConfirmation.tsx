@@ -30,13 +30,14 @@ const OrderConfirmation = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showSuccessOverlay, setShowSuccessOverlay] = useState(true);
+  const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
 
+  // Start auto-dismiss timer only AFTER order is confirmed loaded from DB
   useEffect(() => {
-    // Auto-dismiss the full-screen success animation after a few seconds
-    const timer = setTimeout(() => setShowSuccessOverlay(false), 5000);
+    if (!showSuccessOverlay) return;
+    const timer = setTimeout(() => setShowSuccessOverlay(false), 6000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [showSuccessOverlay]);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
