@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,8 @@ import { useCart } from "@/hooks/useCart";
 const PlaceOrder = () => {
   const navigate = useNavigate();
   const { items, removeItem, updateItem, clearCart, getTotalEstimate, getItemEstimate } = useCart();
-  const [user, setUser] = useState<any>(null);
+  const isNavigatingToConfirmationRef = useRef(false);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
@@ -38,7 +40,7 @@ const PlaceOrder = () => {
   }, [navigate]);
 
   useEffect(() => {
-    if (items.length === 0 && user) {
+    if (items.length === 0 && user && !isNavigatingToConfirmationRef.current) {
       navigate("/");
     }
   }, [items.length, user, navigate]);
@@ -164,10 +166,12 @@ const PlaceOrder = () => {
         if (imagesError) throw imagesError;
       }
 
-      clearCart();
+      isNavigatingToConfirmationRef.current = true;
       navigate(`/order-confirmation?orderId=${orderData.id}`);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to place order");
+      clearCart();
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to place order";
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
