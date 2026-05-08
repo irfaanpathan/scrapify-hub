@@ -55,6 +55,8 @@ const OrderConfirmation = () => {
 
         if (orderError) throw orderError;
         setOrder(orderData);
+        // Show overlay only AFTER order is verified saved in DB
+        setShowSuccessOverlay(true);
 
         const { data: itemsData, error: itemsError } = await supabase
           .from("order_items")
