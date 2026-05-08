@@ -267,12 +267,6 @@ const OrderConfirmation = () => {
               </span>
             </div>
 
-            <div className="bg-warning/10 border border-warning/20 rounded-lg p-3">
-              <p className="text-xs text-warning-foreground">
-                ⚠️ Final price may vary during doorstep inspection by our partner.
-              </p>
-            </div>
-
             <Separator />
 
             {/* Pickup Details */}
