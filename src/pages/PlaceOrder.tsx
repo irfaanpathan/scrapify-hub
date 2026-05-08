@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
@@ -16,6 +16,7 @@ import { useCart } from "@/hooks/useCart";
 const PlaceOrder = () => {
   const navigate = useNavigate();
   const { items, removeItem, updateItem, clearCart, getTotalEstimate, getItemEstimate } = useCart();
+  const isNavigatingToConfirmationRef = useRef(false);
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [addressLine1, setAddressLine1] = useState("");
@@ -38,7 +39,7 @@ const PlaceOrder = () => {
   }, [navigate]);
 
   useEffect(() => {
-    if (items.length === 0 && user) {
+    if (items.length === 0 && user && !isNavigatingToConfirmationRef.current) {
       navigate("/");
     }
   }, [items.length, user, navigate]);
@@ -164,8 +165,9 @@ const PlaceOrder = () => {
         if (imagesError) throw imagesError;
       }
 
-      clearCart();
+      isNavigatingToConfirmationRef.current = true;
       navigate(`/order-confirmation?orderId=${orderData.id}`);
+      clearCart();
     } catch (error: any) {
       toast.error(error.message || "Failed to place order");
     } finally {
